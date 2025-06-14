@@ -54,6 +54,9 @@ tokens = [
     'COLON',           # :
     
     # Fin Cristhian Santacruz
+    #Noelia Saltos Hernandez
+    'RANGE',
+
 
 ]
 
@@ -73,9 +76,17 @@ reserved = {
     'String': 'TYPE_STRING',   
     'true': 'BOOLEAN_TRUE',    
     'false': 'BOOLEAN_FALSE',  
-    'println': 'PRINTLN',    
-
+    'println': 'PRINTLN', 
     # Fin Cristhian Santacruz
+
+    #Noelia Saltos Hernandez
+    'if': 'IF',
+    'else': 'ELSE',
+    'for': 'FOR',
+    'while': 'WHILE',
+    'break': 'BREAK',
+    'continue': 'CONTINUE',
+   
 }
 
 
@@ -98,6 +109,24 @@ t_COLON = r':'
 t_QUESTION = r'\?'
 
 # Reglas para tokens 
+
+#Noelia Saltos Hernandez
+
+# Comentario de una línea
+def t_COMMENT_LINE(t):
+    r'\/\/.*'
+    pass  # Se ignora
+
+# Comentario de múltiples líneas
+def t_COMMENT_BLOCK(t):
+    r'/\*(.|\n)*?\*/'
+    t.lexer.lineno += t.value.count('\n')
+    pass
+
+def t_RANGE(t):
+    r'\.\.'
+    return t
+
 
 # Inicio Cristhian Santacruz
 def t_ELVIS(t):
@@ -226,3 +255,39 @@ val longitud = nombre?.length ?: 0'''
     test_lexer(test_code6)
     print()
     
+    # Caso 7: Estructura if-else
+    print("🧪 CASO 7: Condicional if/else")
+    test_code_if = '''if (edad >= 18 && edad < 65) {
+    println("Adulto activo")
+} else {
+    println("Otro grupo de edad")
+}'''
+    test_lexer(test_code_if)
+
+    # Caso 8: Estructura for y while
+    print("🧪 CASO 8: Ciclos for y while")
+    test_code_loops = '''for (i in 1..5) {
+        if (i == 3) continue
+        println(i)
+        if (i == 4) break
+    }
+
+    var x = 0
+    while (x < 3) {
+        println(x)
+        x = x + 1
+    }'''
+    test_lexer(test_code_loops)
+
+    # Caso 9: comentarios
+    print("🧪 CASO 9: Comentarios")
+    test_code_comments = '''// Este es un comentario de línea
+    /*
+    Este es un comentario
+    de bloque con múltiples líneas
+    */
+    val mensaje = "Hola"'''
+    test_lexer(test_code_comments)
+
+
+
