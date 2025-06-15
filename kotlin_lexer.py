@@ -8,6 +8,9 @@
 
 
 import ply.lex as lex
+import os
+from datetime import datetime
+
 
 # Lista de tokens para nuestro lexer
 tokens = [
@@ -56,7 +59,7 @@ tokens = [
     # Fin Cristhian Santacruz
     #Noelia Saltos Hernandez
     'RANGE',
-
+    #Fin Noelia Saltos Hernandez
 
 ]
 
@@ -86,6 +89,7 @@ reserved = {
     'while': 'WHILE',
     'break': 'BREAK',
     'continue': 'CONTINUE',
+    #Fin Noelia Saltos Hernandez
    
 }
 
@@ -127,6 +131,7 @@ def t_RANGE(t):
     r'\.\.'
     return t
 
+# Fin Noelia Saltos Hernandez
 
 # Inicio Cristhian Santacruz
 def t_ELVIS(t):
@@ -196,98 +201,62 @@ def t_newline(t):
 # Caracteres ignorados (espacios y tabs)
 t_ignore = ' \t'
 
-# Manejo de errores
+# Manejo de errores -Noelia Saltos Hernandez
 def t_error(t):
-    print(f"Carácter incorrecto '{t.value[0]}' en línea {t.lineno}")
+    error_msg = f"Carácter incorrecto '{t.value[0]}' en línea {t.lineno}"
+    print(error_msg)
+
+    if hasattr(t.lexer, "log_file") and t.lexer.log_file:
+        t.lexer.log_file.write("ERROR: " + error_msg + "\n")
+
     t.lexer.skip(1)
+
 
 # Aqui contruimos el lexer
 lexer = lex.lex()
 
-def test_lexer(data):  
-    lexer.input(data)
-    print(f"Revisando el input: {data}")
-    tokens_found = []
-    while True:
-        tok = lexer.token()
-        if not tok:
-            break
-        print(f"Token: {tok.type} - Valor: {repr(tok.value)} - Línea actual : {tok.lineno}")
-        tokens_found.append((tok.type, tok.value))
-    
-    return tokens_found
+#Noelia Saltos Hernandez
+# Función para probar el lexer con un código de ejemplo
 
- ##! CASOS DE PRUEBA NO CUENTA PARA el PROYECTO  (SE DEBE ELIMINAR ESTO PARA EL FINAL Y SOLO PROBAR CON NUESTROS ALGORITMOS)
+def test_lexer(data, usuario_git="usuarioGit"):
+    lexer.input(data)
+    now = datetime.now()
+    timestamp = now.strftime("%d-%m-%Y-%Hh%M")
+    filename = f"logs/lexico-{usuario_git}-{timestamp}.txt"
+
+    os.makedirs("logs", exist_ok=True)
+
+    with open(filename, "w", encoding="utf-8") as log_file:
+        log_file.write("=== LOG DE ANALISIS LEXICO ===\n")
+        log_file.write(f"Usuario: {usuario_git}\n")
+        log_file.write(f"Fecha y hora: {timestamp}\n\n")
+        log_file.write("Tokens reconocidos:\n")
+
+        lexer.log_file = log_file  # <- Para que el t_error lo pueda usar
+
+        while True:
+            tok = lexer.token()
+            if not tok:
+                break
+            token_info = f"Token: {tok.type} - Valor: {repr(tok.value)} - Línea actual : {tok.lineno}"
+            print(token_info)
+            log_file.write(token_info + "\n")
+
+        log_file.write("\nFin del análisis léxico.\n")
+        log_file.write("================================\n")
+
+def analizar_archivo(nombre_archivo, usuario_git="usuarioGit"):
+    try:
+        with open(nombre_archivo, "r", encoding="utf-8") as archivo:
+            contenido = archivo.read()
+            test_lexer(contenido, usuario_git)
+    except FileNotFoundError:
+        print(f"❌ El archivo {nombre_archivo} no fue encontrado.")
+
 
 if __name__ == "__main__":
     print("=== ANALIZADOR LEXICO KOTLIN-LIKE ===\n")
 
-    # Caso 1: Declaración de variables
-    print("🧪 CASO 1: Declaracion de variables")
-    test_code1 = '''val nombre: String = "Cristhian"
-var edad: Int = 25
-var precio: Double = 19.99'''
-    test_lexer(test_code1)
-    print()
-    
-    
-    # Caso 3: Función simple
-    print("🧪 CASO 3: Función simple")
-    test_code3 = '''fun saludar(nombre: String): String {
-    return "Hola " + nombre
-}'''
-    test_lexer(test_code3)
-    print()
-    
-    # Caso 5: Null safety
-    print("🧪 CASO 5: Null safety")
-    test_code5 = '''val nombre: String? = "Juan"
-val longitud = nombre?.length ?: 0'''
-    test_lexer(test_code5)
-    print()
-    
-    # Caso 6: Estructura when
-    print("🧪 CASO 6: Estructura when")
-    test_code6 = '''when (edad) {
-    18 -> println("Adulto joven")
-    65 -> println("Adulto mayor")
-}'''
-    test_lexer(test_code6)
-    print()
-    
-    # Caso 7: Estructura if-else
-    print("🧪 CASO 7: Condicional if/else")
-    test_code_if = '''if (edad >= 18 && edad < 65) {
-    println("Adulto activo")
-} else {
-    println("Otro grupo de edad")
-}'''
-    test_lexer(test_code_if)
 
-    # Caso 8: Estructura for y while
-    print("🧪 CASO 8: Ciclos for y while")
-    test_code_loops = '''for (i in 1..5) {
-        if (i == 3) continue
-        println(i)
-        if (i == 4) break
-    }
-
-    var x = 0
-    while (x < 3) {
-        println(x)
-        x = x + 1
-    }'''
-    test_lexer(test_code_loops)
-
-    # Caso 9: comentarios
-    print("🧪 CASO 9: Comentarios")
-    test_code_comments = '''// Este es un comentario de línea
-    /*
-    Este es un comentario
-    de bloque con múltiples líneas
-    */
-    val mensaje = "Hola"'''
-    test_lexer(test_code_comments)
-
-
-
+    # Analizar archivo externo .kt
+    analizar_archivo("algoritmo2.kt", usuario_git="NoeSaltos")
