@@ -61,6 +61,19 @@ tokens = [
     'RANGE',
     #Fin Noelia Saltos Hernandez
 
+    # Comienzo Jahir Díaz
+    'LISTOF',
+    'ARRAYOF',
+    'MAPOF',
+    'TO',
+    'SUM',
+    'FILTER',
+    'CONTAINS',
+    'INDICES',
+    'LBRACKET',
+    'RBRACKET',
+    # Fin Jahir Díaz
+
 ]
 
 # Palabras reservada del lenguaje kotlin
@@ -91,6 +104,12 @@ reserved = {
     'continue': 'CONTINUE',
     #Fin Noelia Saltos Hernandez
    
+    # Comienzo Jahir Díaz
+    'listOf': 'LISTOF',
+    'arrayOf': 'ARRAYOF',
+    'mapOf': 'MAPOF',
+    'to': 'TO',
+    # Fin Jahir Díaz
 }
 
 
@@ -187,6 +206,33 @@ def t_STRING(t):
 
 # Fin Cristhian Santacruz
 
+
+
+# Comienzo Jahir Díaz
+
+def t_SUM(t):
+    r'\.sum\s*\(\)'
+    return t
+
+def t_FILTER(t):
+    r'\.filter\s*\{'
+    return t
+
+def t_CONTAINS(t):
+    r'\.contains\s*\('
+    return t
+
+def t_INDICES(t):
+    r'\.indices'
+    return t
+
+t_LBRACKET = r'\['
+t_RBRACKET = r'\]'
+
+# Fin Jahir Díaz
+
+
+
 # Regla para identificadores 
 def t_ID(t):
     r'[a-zA-Z_][a-zA-Z_0-9]*'
@@ -260,3 +306,8 @@ if __name__ == "__main__":
 
     # Analizar archivo externo .kt
     analizar_archivo("algoritmo2.kt", usuario_git="NoeSaltos")
+    
+    
+    # Jahir Díaz Cedeño
+    # Analizar archivo externo .kt
+    analizar_archivo("algoritmo3.kt", usuario_git="JDC1907")
