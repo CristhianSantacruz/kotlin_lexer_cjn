@@ -1,11 +1,10 @@
 
-#Lenguje de Programacion (KOTLIN)
+#Lenguaje de Programacion (KOTLIN)
 
 # Integrantes
 # DIAZ CEDEÑO JAHIR ALEXANDER
 # SALTOS HERNANDEZ NOELIA ALEJANDRA
 # SANTACRUZ GOROZABEL CRISTHIAN MAICKEL
-
 
 import ply.lex as lex
 import os
@@ -57,8 +56,10 @@ tokens = [
     'COLON',           # :
     
     # Fin Cristhian Santacruz
+
     #Noelia Saltos Hernandez
     'RANGE',
+    'DOT',
     #Fin Noelia Saltos Hernandez
 
     # Comienzo Jahir Díaz
@@ -130,10 +131,11 @@ t_SEMICOLON = r';'
 t_COMMA = r','
 t_COLON = r':'
 t_QUESTION = r'\?'
+t_DOT = r'\.'
 
 # Reglas para tokens 
 
-#Noelia Saltos Hernandez
+# Inicio Noelia Saltos Hernandez
 
 # Comentario de una línea
 def t_COMMENT_LINE(t):
@@ -261,7 +263,9 @@ def t_error(t):
 # Aqui contruimos el lexer
 lexer = lex.lex()
 
-#Noelia Saltos Hernandez
+# Fin Noelia Saltos Hernandez
+
+#Inicio Noelia Saltos Hernandez
 # Función para probar el lexer con un código de ejemplo
 
 def test_lexer(data, usuario_git="usuarioGit"):
@@ -299,11 +303,12 @@ def analizar_archivo(nombre_archivo, usuario_git="usuarioGit"):
     except FileNotFoundError:
         print(f"❌ El archivo {nombre_archivo} no fue encontrado.")
 
+# Fin Noelia Saltos Hernandez
 
 if __name__ == "__main__":
     print("=== ANALIZADOR LEXICO KOTLIN-LIKE ===\n")
 
-
+    #Noelia Saltos Hernandez
     # Analizar archivo externo .kt
     analizar_archivo("algoritmo2.kt", usuario_git="NoeSaltos")
     
@@ -311,3 +316,7 @@ if __name__ == "__main__":
     # Jahir Díaz Cedeño
     # Analizar archivo externo .kt
     analizar_archivo("algoritmo3.kt", usuario_git="JDC1907")
+
+    # Cristhian Santacruz Gorozabel
+    # Analizar archivo externo .kt
+    analizar_archivo("algoritmo1.kt", usuario_git="CristhianSantacruz")

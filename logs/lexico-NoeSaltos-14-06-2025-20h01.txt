@@ -1,6 +1,6 @@
 === LOG DE ANALISIS LEXICO ===
 Usuario: NoeSaltos
-Fecha y hora: 14-06-2025-19h54
+Fecha y hora: 14-06-2025-20h01
 
 Tokens reconocidos:
 Token: FUN - Valor: 'fun' - Línea actual : 1
