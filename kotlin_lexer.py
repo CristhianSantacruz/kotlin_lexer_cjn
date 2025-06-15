@@ -106,6 +106,10 @@ reserved = {
     'while': 'WHILE',
     'break': 'BREAK',
     'continue': 'CONTINUE',
+    'try': 'TRY',
+    'catch': 'CATCH',
+    'finally': 'FINALLY',
+
     #Fin Noelia Saltos Hernandez
    
     # Comienzo Jahir Díaz
@@ -186,6 +190,7 @@ def t_COMMENT_BLOCK(t):
 def t_RANGE(t):
     r'\.\.'
     return t
+
 
 # Fin Noelia Saltos Hernandez
 
@@ -355,3 +360,6 @@ if __name__ == "__main__":
     # Cristhian Santacruz Gorozabel
     # Analizar archivo externo .kt
     analizar_archivo("algoritmo1.kt", usuario_git="CristhianSantacruz")
+    
+
+    
