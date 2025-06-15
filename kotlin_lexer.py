@@ -75,6 +75,9 @@ tokens = [
     'RBRACKET',
     # Fin Jahir Díaz
 
+
+    
+
 ]
 
 # Palabras reservada del lenguaje kotlin
@@ -111,6 +114,38 @@ reserved = {
     'mapOf': 'MAPOF',
     'to': 'TO',
     # Fin Jahir Díaz
+
+
+    # Adicional a nuestro analizador lexico
+    'class': 'CLASS',
+    'interface': 'INTERFACE',
+    'abstract': 'ABSTRACT',
+    'open': 'OPEN',
+    'final': 'FINAL',
+    'sealed': 'SEALED',
+    'data': 'DATA',
+    'enum': 'ENUM',
+    'object': 'OBJECT',
+    'companion': 'COMPANION',
+    'init': 'INIT',
+    'constructor': 'CONSTRUCTOR',
+    'override': 'OVERRIDE',
+    'private': 'PRIVATE',
+    'public': 'PUBLIC',
+    'protected': 'PROTECTED',
+    'internal': 'INTERNAL',
+    'super': 'SUPER',
+    'this': 'THIS',
+    'extends': 'EXTENDS',
+    'implements': 'IMPLEMENTS',
+    'lateinit': 'LATEINIT',
+    'inner': 'INNER',
+    'inline': 'INLINE',
+    'crossinline': 'CROSSINLINE',
+    'noinline': 'NOINLINE',
+    'reified': 'REIFIED',
+    'out': 'OUT',
+    'in': 'IN',
 }
 
 
