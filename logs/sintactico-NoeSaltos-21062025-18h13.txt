@@ -1,0 +1,47 @@
+=== LOG DE ANALISIS SINTACTICO ===
+Usuario: NoeSaltos
+Fecha y hora: 21062025-18h13
+Archivo: algoritmo_sintactico2.kt
+
+Código fuente analizado:
+----------------------------------------
+val numeros = arrayOf(10, 20, 30)
+
+val edad = 17
+if (edad >= 18) {
+    println("Mayor de edad")
+} else {
+    println("Menor de edad")
+}
+
+fun saludar() {
+    println("Hola mundo")
+}
+
+val entrada = readLine()
+println(entrada)
+
+val resultado = 3 + 4 * 2
+
+----------------------------------------
+
+Sintaxis válida. Resultado del análisis:
+[ ( 'declare',
+    'val',
+    'numeros',
+    ('arrayOf', [('literal', 10), ('literal', 20), ('literal', 30)])),
+  ('declare', 'val', 'edad', ('literal', 17)),
+  ( 'if_else',
+    ('binop', '>=', ('id', 'edad'), ('literal', 18)),
+    [('print', ('literal', 'Mayor de edad'))],
+    [('print', ('literal', 'Menor de edad'))]),
+  ('func_def_no_return', 'saludar', [], [('print', ('literal', 'Hola mundo'))]),
+  ('declare', 'val', 'entrada', ('readLine',)),
+  ('print', ('id', 'entrada')),
+  ( 'declare',
+    'val',
+    'resultado',
+    ( 'binop',
+      '+',
+      ('literal', 3),
+      ('binop', '*', ('literal', 4), ('literal', 2))))]

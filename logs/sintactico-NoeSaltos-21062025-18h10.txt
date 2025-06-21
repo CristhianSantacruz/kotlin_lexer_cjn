@@ -1,0 +1,29 @@
+=== LOG DE ANALISIS SINTACTICO ===
+Usuario: NoeSaltos
+Fecha y hora: 21062025-18h10
+Archivo: algoritmo_sintactico_mal1.kt
+
+Código fuente analizado:
+----------------------------------------
+val nombre = "Carlos"
+var edad = 
+
+fun saludar( {
+    println("Hola mundo")
+}
+
+if edad >= 18 {
+    println("Mayor de edad")
+} else
+    println("Menor de edad"
+
+val numeros = arrayOf(1, 2, 3
+
+----------------------------------------
+
+ ERRORES DE SINTAXIS:
+Error de sintaxis en token 'FUN' (valor: fun) en la línea 33
+Error de sintaxis en token 'RBRACE' (valor: }) en la línea 35
+Error de sintaxis en token 'RBRACE' (valor: }) en la línea 39
+Error de sintaxis en token 'VAL' (valor: val) en la línea 42
+Error de sintaxis: fin inesperado del archivo (EOF)

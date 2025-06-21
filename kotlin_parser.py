@@ -1,8 +1,9 @@
 import ply.yacc as yacc  
 from kotlin_lexer import tokens  
 from datetime import datetime
+from pprint import pprint
 import os
-
+from pprint import pformat
 
 # Precedencia de operadores
 precedence = (
@@ -187,6 +188,7 @@ def p_expression_listOf(p):
     """expression : LISTOF LPAREN expression_list RPAREN"""
     p[0] = ("listOf", p[3])
 
+
 def p_expression_list_multiple(p):
     """expression_list : expression_list COMMA expression"""
     p[1].append(p[3])
@@ -276,80 +278,81 @@ def p_method_def(p):
 
 # Termina Cristhian Santacruz
 
+# Comienza Noelia Saltos
+def p_expression_arrayof(p):
+    """expression : ARRAYOF LPAREN expression_list RPAREN"""
+    p[0] = ("arrayOf", p[3])
+
+def p_if_else(p):
+    '''statement : IF LPAREN expression RPAREN block ELSE block'''
+    p[0] = ("if_else", p[3], p[5], p[7])
 
 
+def p_function_def_no_return(p):
+    """function_def_no_return : FUN ID LPAREN param_list_opt RPAREN block"""
+    p[0] = ("func_def_no_return", p[2], p[4], p[6])
+
+def p_expression_readline(p):
+    '''expression : READLINE LPAREN RPAREN'''
+    p[0] = ("readLine",)
+
+
+errores_sintacticos = [] 
 # Manejo de errores y creación de logs
 def p_error(p):
     if p:
-        error_msg = f"Syntax error at token {p.type} (value: {p.value})\n"
+        error_msg = f"Error de sintaxis en token '{p.type}' (valor: {p.value}) en la línea {p.lineno}"
     else:
-        error_msg = "Syntax error at EOF\n"
-
-    timestamp = datetime.now().strftime("%d-%m-%Y-%Hh%M")
-    log_filename = f"logs/sintactico-error-{timestamp}.txt"
-    os.makedirs("logs", exist_ok=True)
-    with open(log_filename, "w", encoding="utf-8") as f:
-        f.write(error_msg)
+        error_msg = "Error de sintaxis: fin inesperado del archivo (EOF)"
+    
+    print(error_msg)
+    errores_sintacticos.append(error_msg)
 
 # Parser
 parser = yacc.yacc()
 
 # Función para probar parser
-def test_parser(data, usuario_git="usuarioGit"):
-    now = datetime.now()
-    timestamp = now.strftime("%d-%m-%Y-%Hh%M")
-    filename = f"logs/sintactico-{usuario_git}-{timestamp}.txt"
-    
-    os.makedirs("logs", exist_ok=True)
-    
+# Función para analizar un archivo y guardar el log
+def analizar_archivo_sintactico(nombre_archivo, usuario_git="usuarioGit"):
+    global errores_sintacticos
+    errores_sintacticos = []  # Limpiar antes de cada análisis
+
     try:
-        result = parser.parse(data)
-        
-        with open(filename, "w", encoding="utf-8") as log_file:
-            log_file.write("=== LOG DE ANALISIS SINTACTICO ===\n")
-            log_file.write(f"Usuario: {usuario_git}\n")
-            log_file.write(f"Fecha y hora: {timestamp}\n\n")
-            log_file.write("Código analizado:\n")
-            log_file.write("-" * 40 + "\n")
-            log_file.write(data + "\n")
-            log_file.write("-" * 40 + "\n\n")
-            
-            if result:
-                log_file.write("Resultado del análisis sintáctico:\n")
-                log_file.write("ÉXITO - Código sintácticamente correcto\n\n")
-                log_file.write("Árbol sintáctico generado:\n")
-                for i, stmt in enumerate(result, 1):
-                    stmt_info = f"Declaración {i}: {stmt}"
-                    print(stmt_info)
-                    log_file.write(stmt_info + "\n")
+        with open(nombre_archivo, "r", encoding="utf-8") as archivo:
+            contenido = archivo.read()
+
+        print(f"📘 Analizando archivo: {nombre_archivo}")
+        resultado = parser.parse(contenido)
+
+        now = datetime.now()
+        timestamp = now.strftime("%d%m%Y-%Hh%M")
+        log_filename = f"logs/sintactico-{usuario_git}-{timestamp}.txt"
+        os.makedirs("logs", exist_ok=True)
+
+        with open(log_filename, "w", encoding="utf-8") as f:
+            f.write("=== LOG DE ANALISIS SINTACTICO ===\n")
+            f.write(f"Usuario: {usuario_git}\n")
+            f.write(f"Fecha y hora: {timestamp}\n")
+            f.write(f"Archivo: {nombre_archivo}\n\n")
+            f.write("Código fuente analizado:\n")
+            f.write("-" * 40 + "\n")
+            f.write(contenido + "\n")
+            f.write("-" * 40 + "\n\n")
+                   
+            if errores_sintacticos:
+                f.write(" ERRORES DE SINTAXIS:\n")
+                for error in errores_sintacticos:
+                    f.write(f"{error}\n")
             else:
-                error_msg = "ERROR - No se pudo generar el árbol sintáctico"
-                print(error_msg)
-                log_file.write(error_msg + "\n")
-            
-            log_file.write("\nFin del análisis sintáctico.\n")
-            log_file.write("================================\n")
-        
-        print(f"\nResultado del análisis sintáctico guardado en: {filename}")
-        return result
-        
-    except Exception as e:
-        error_msg = f"Error durante el parsing: {e}"
-        print(error_msg)
-        
-        with open(filename, "w", encoding="utf-8") as log_file:
-            log_file.write("=== LOG DE ANALISIS SINTACTICO ===\n")
-            log_file.write(f"Usuario: {usuario_git}\n")
-            log_file.write(f"Fecha y hora: {timestamp}\n\n")
-            log_file.write("Código analizado:\n")
-            log_file.write("-" * 40 + "\n")
-            log_file.write(data + "\n")
-            log_file.write("-" * 40 + "\n\n")
-            log_file.write("ERROR EN EL ANÁLISIS SINTÁCTICO:\n")
-            log_file.write(str(e) + "\n")
-            log_file.write("\nFin del análisis sintáctico.\n")
-            log_file.write("================================\n")
-        
-        return None
+                f.write("Sintaxis válida. Resultado del análisis:\n")
+                f.write(pformat(resultado, indent=2, width=80))
+
+        print("Log generado:", log_filename)
+
+    except FileNotFoundError:
+        print(f"Archivo '{nombre_archivo}' no encontrado.")
 
 
+# analizar_archivo_sintactico("algoritmo_sintactico1.kt", usuario_git="JDC1907")
+analizar_archivo_sintactico("algoritmo_sintactico2.kt", usuario_git="NoeSaltos")
+# analizar_archivo_sintactico("algoritmo_sintactico_mal1.kt", usuario_git="NoeSaltos")
