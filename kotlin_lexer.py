@@ -54,6 +54,7 @@ tokens = [
     'SEMICOLON',       # ;
     'COMMA',           # ,
     'COLON',           # :
+    'ARROW',           # ->
     
     # Fin Cristhian Santacruz
 
@@ -108,6 +109,7 @@ reserved = {
     'true': 'BOOLEAN_TRUE',    
     'false': 'BOOLEAN_FALSE',  
     'println': 'PRINTLN', 
+    'print': 'PRINT',
     # Fin Cristhian Santacruz
 
     #Noelia Saltos Hernandez
@@ -161,6 +163,7 @@ reserved = {
     'reified': 'REIFIED',
     'out': 'OUT',
     'in': 'IN',
+ 
 }
 
 
@@ -202,6 +205,10 @@ def t_RANGE(t):
     r'\.\.'
     return t
 
+
+def t_ARROW(t):
+    r'->'
+    return t
 
 # Fin Noelia Saltos Hernandez
 
