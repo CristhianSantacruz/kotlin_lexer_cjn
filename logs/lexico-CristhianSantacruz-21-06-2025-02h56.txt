@@ -1,0 +1,121 @@
+=== LOG DE ANALISIS LEXICO ===
+Usuario: CristhianSantacruz
+Fecha y hora: 21-06-2025-02h56
+
+Tokens reconocidos:
+Token: FUN - Valor: 'fun' - Línea actual : 107
+Token: ID - Valor: 'main' - Línea actual : 107
+Token: LPAREN - Valor: '(' - Línea actual : 107
+Token: RPAREN - Valor: ')' - Línea actual : 107
+Token: LBRACE - Valor: '{' - Línea actual : 107
+Token: VAL - Valor: 'val' - Línea actual : 108
+Token: ID - Valor: 'numeros' - Línea actual : 108
+Token: ASSIGN - Valor: '=' - Línea actual : 108
+Token: LISTOF - Valor: 'listOf' - Línea actual : 108
+Token: LPAREN - Valor: '(' - Línea actual : 108
+Token: NUMBER_INT - Valor: 13 - Línea actual : 108
+Token: COMMA - Valor: ',' - Línea actual : 108
+Token: NUMBER_INT - Valor: 45 - Línea actual : 108
+Token: COMMA - Valor: ',' - Línea actual : 108
+Token: NUMBER_INT - Valor: 2 - Línea actual : 108
+Token: COMMA - Valor: ',' - Línea actual : 108
+Token: NUMBER_INT - Valor: 9 - Línea actual : 108
+Token: COMMA - Valor: ',' - Línea actual : 108
+Token: NUMBER_INT - Valor: 33 - Línea actual : 108
+Token: COMMA - Valor: ',' - Línea actual : 108
+Token: NUMBER_INT - Valor: 58 - Línea actual : 108
+Token: COMMA - Valor: ',' - Línea actual : 108
+Token: NUMBER_INT - Valor: 76 - Línea actual : 108
+Token: COMMA - Valor: ',' - Línea actual : 108
+Token: NUMBER_INT - Valor: 101 - Línea actual : 108
+Token: COMMA - Valor: ',' - Línea actual : 108
+Token: NUMBER_INT - Valor: 20 - Línea actual : 108
+Token: RPAREN - Valor: ')' - Línea actual : 108
+Token: IF - Valor: 'if' - Línea actual : 110
+Token: LPAREN - Valor: '(' - Línea actual : 110
+Token: ID - Valor: 'numeros' - Línea actual : 110
+Token: DOT - Valor: '.' - Línea actual : 110
+Token: ID - Valor: 'isEmpty' - Línea actual : 110
+Token: LPAREN - Valor: '(' - Línea actual : 110
+Token: RPAREN - Valor: ')' - Línea actual : 110
+Token: RPAREN - Valor: ')' - Línea actual : 110
+Token: LBRACE - Valor: '{' - Línea actual : 110
+Token: PRINTLN - Valor: 'println' - Línea actual : 111
+Token: LPAREN - Valor: '(' - Línea actual : 111
+Token: STRING - Valor: 'La lista está vacía.' - Línea actual : 111
+Token: RPAREN - Valor: ')' - Línea actual : 111
+Token: RBRACE - Valor: '}' - Línea actual : 112
+Token: ELSE - Valor: 'else' - Línea actual : 112
+Token: LBRACE - Valor: '{' - Línea actual : 112
+Token: VAL - Valor: 'val' - Línea actual : 113
+Token: ID - Valor: 'sumaTotal' - Línea actual : 113
+Token: ASSIGN - Valor: '=' - Línea actual : 113
+Token: ID - Valor: 'numeros' - Línea actual : 113
+Token: SUM - Valor: '.sum' - Línea actual : 113
+Token: LPAREN - Valor: '(' - Línea actual : 113
+Token: RPAREN - Valor: ')' - Línea actual : 113
+Token: PRINTLN - Valor: 'println' - Línea actual : 114
+Token: LPAREN - Valor: '(' - Línea actual : 114
+Token: STRING - Valor: 'La suma total es: $sumaTotal' - Línea actual : 114
+Token: RPAREN - Valor: ')' - Línea actual : 114
+Token: IF - Valor: 'if' - Línea actual : 116
+Token: LPAREN - Valor: '(' - Línea actual : 116
+Token: ID - Valor: 'sumaTotal' - Línea actual : 116
+Token: MODULO - Valor: '%' - Línea actual : 116
+Token: NUMBER_INT - Valor: 2 - Línea actual : 116
+Token: EQUALS - Valor: '==' - Línea actual : 116
+Token: NUMBER_INT - Valor: 0 - Línea actual : 116
+Token: RPAREN - Valor: ')' - Línea actual : 116
+Token: LBRACE - Valor: '{' - Línea actual : 116
+Token: PRINTLN - Valor: 'println' - Línea actual : 117
+Token: LPAREN - Valor: '(' - Línea actual : 117
+Token: STRING - Valor: 'La suma es par.' - Línea actual : 117
+Token: RPAREN - Valor: ')' - Línea actual : 117
+Token: RBRACE - Valor: '}' - Línea actual : 118
+Token: ELSE - Valor: 'else' - Línea actual : 118
+Token: LBRACE - Valor: '{' - Línea actual : 118
+Token: PRINTLN - Valor: 'println' - Línea actual : 119
+Token: LPAREN - Valor: '(' - Línea actual : 119
+Token: STRING - Valor: 'La suma es impar.' - Línea actual : 119
+Token: RPAREN - Valor: ')' - Línea actual : 119
+Token: RBRACE - Valor: '}' - Línea actual : 120
+Token: VAL - Valor: 'val' - Línea actual : 122
+Token: ID - Valor: 'mayoresA30' - Línea actual : 122
+Token: ASSIGN - Valor: '=' - Línea actual : 122
+Token: ID - Valor: 'numeros' - Línea actual : 122
+Token: FILTER - Valor: '.filter' - Línea actual : 122
+Token: LBRACE - Valor: '{' - Línea actual : 122
+Token: ID - Valor: 'it' - Línea actual : 122
+Token: GREATER - Valor: '>' - Línea actual : 122
+Token: NUMBER_INT - Valor: 30 - Línea actual : 122
+Token: RBRACE - Valor: '}' - Línea actual : 122
+Token: PRINTLN - Valor: 'println' - Línea actual : 123
+Token: LPAREN - Valor: '(' - Línea actual : 123
+Token: STRING - Valor: 'Numeros mayores a 30: $mayoresA30' - Línea actual : 123
+Token: RPAREN - Valor: ')' - Línea actual : 123
+Token: IF - Valor: 'if' - Línea actual : 125
+Token: LPAREN - Valor: '(' - Línea actual : 125
+Token: ID - Valor: 'numeros' - Línea actual : 125
+Token: CONTAINS - Valor: '.contains' - Línea actual : 125
+Token: LPAREN - Valor: '(' - Línea actual : 125
+Token: NUMBER_INT - Valor: 33 - Línea actual : 125
+Token: RPAREN - Valor: ')' - Línea actual : 125
+Token: RPAREN - Valor: ')' - Línea actual : 125
+Token: LBRACE - Valor: '{' - Línea actual : 125
+Token: PRINTLN - Valor: 'println' - Línea actual : 126
+Token: LPAREN - Valor: '(' - Línea actual : 126
+Token: STRING - Valor: '33 está en la lista.' - Línea actual : 126
+Token: RPAREN - Valor: ')' - Línea actual : 126
+Token: RBRACE - Valor: '}' - Línea actual : 127
+Token: ELSE - Valor: 'else' - Línea actual : 127
+Token: LBRACE - Valor: '{' - Línea actual : 127
+Token: PRINTLN - Valor: 'println' - Línea actual : 128
+Token: LPAREN - Valor: '(' - Línea actual : 128
+Token: STRING - Valor: '33 no esta en la lista.' - Línea actual : 128
+Token: RPAREN - Valor: ')' - Línea actual : 128
+Token: RBRACE - Valor: '}' - Línea actual : 129
+Token: RBRACE - Valor: '}' - Línea actual : 130
+Token: RBRACE - Valor: '}' - Línea actual : 131
+
+Fin del análisis léxico.
+================================
