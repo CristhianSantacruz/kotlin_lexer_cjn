@@ -63,16 +63,27 @@ tokens = [
     #Fin Noelia Saltos Hernandez
 
     # Comienzo Jahir Díaz
-    'LISTOF',
-    'ARRAYOF',
-    'MAPOF',
-    'TO',
+    #Correción
     'SUM',
     'FILTER',
     'CONTAINS',
     'INDICES',
     'LBRACKET',
     'RBRACKET',
+    
+    #Anterior
+    #_____________________________
+    # 'LISTOF',
+    # 'ARRAYOF',
+    # 'MAPOF',
+    # 'TO',
+    # 'SUM',
+    # 'FILTER',
+    # 'CONTAINS',
+    # 'INDICES',
+    # 'LBRACKET',
+    # 'RBRACKET',
+     #_____________________________
     # Fin Jahir Díaz
 
 
@@ -253,16 +264,17 @@ def t_STRING(t):
 # Comienzo Jahir Díaz
 
 def t_SUM(t):
-    r'\.sum\s*\(\)'
+    r'\.sum'
     return t
 
 def t_FILTER(t):
-    r'\.filter\s*\{'
+    r'\.filter'
     return t
 
 def t_CONTAINS(t):
-    r'\.contains\s*\('
+    r'\.contains'
     return t
+
 
 def t_INDICES(t):
     r'\.indices'
