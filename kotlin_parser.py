@@ -431,3 +431,4 @@ def analizar_archivo_sintactico(nombre_archivo, usuario_git="usuarioGit"):
 
 analizar_archivo_sintactico("algoritmo_sintactico1.kt", usuario_git="JDC1907")
 analizar_archivo_sintactico("algoritmo_sintactico2.kt", usuario_git="NoeSaltos")
+analizar_archivo_sintactico("algoritmo_sintactico3.kt", usuario_git="CristhianSantacruz")

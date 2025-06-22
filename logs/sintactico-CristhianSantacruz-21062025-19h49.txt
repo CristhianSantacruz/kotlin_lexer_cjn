@@ -1,0 +1,45 @@
+=== LOG DE ANALISIS SINTACTICO ===
+Usuario: CristhianSantacruz
+Fecha y hora: 21062025-19h49
+Archivo: algoritmo_sintactico3.kt
+
+Código fuente analizado:
+----------------------------------------
+fun main() {
+    val listaNombres = listOf("Cristhian", "Maickel", "Jahir")
+
+    
+    class Persona {
+        var nombre: String = "Crithian"
+        val edad: Int = 25
+
+        fun presentarse() {
+            println("Soy " + nombre)
+        }
+    }
+
+  
+    val persona = Persona()
+    persona.presentarse()
+
+   
+    fun saludar(nombre: String) {
+        println("Hola " + nombre)
+    }
+
+    saludar("Cristhian")
+
+    /
+    when (persona.edad) {
+        18 -> println("Mayor de edad")
+        else -> println("Menor de edad")
+    }
+}
+
+----------------------------------------
+
+ ERRORES DE SINTAXIS:
+Error de sintaxis en token 'RPAREN' (valor: )) en la línea 48
+Error de sintaxis en token 'WHEN' (valor: when) en la línea 59
+Error de sintaxis en token 'ELSE' (valor: else) en la línea 61
+Error de sintaxis en token 'RBRACE' (valor: }) en la línea 62

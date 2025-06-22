@@ -1,0 +1,66 @@
+=== LOG DE ANALISIS SINTACTICO ===
+Usuario: CristhianSantacruz
+Fecha y hora: 21062025-19h55
+Archivo: algoritmo_sintactico3.kt
+
+Código fuente analizado:
+----------------------------------------
+fun main() {
+    val listaNombres = listOf("Cristhian", "Maickel", "Jahir")
+    
+    class Persona {
+        var nombre: String = "Cristhian"
+        val edad: Int = 25
+        
+        fun presentarse() {
+            println("Soy " + nombre)
+        }
+    }
+    
+    fun saludar(nombre: String) {
+        println("Hola " + nombre)
+    }
+    
+    saludar("Cristhian")
+    
+    val edad = 25
+    when (edad) {
+        18 -> println("Mayor de edad")
+        else -> println("Menor de edad")
+    }
+}
+----------------------------------------
+
+Sintaxis válida. Resultado del análisis:
+[ ( 'func_def_no_params_no_return',
+    'main',
+    [],
+    [ ( 'declare',
+        'val',
+        'listaNombres',
+        ( 'listOf',
+          [ ('literal', 'Cristhian'),
+            ('literal', 'Maickel'),
+            ('literal', 'Jahir')])),
+      ( 'class_def',
+        'Persona',
+        [ ('property', 'var', 'nombre', 'String', ('literal', 'Cristhian')),
+          ('property', 'val', 'edad', 'Int', ('literal', 25)),
+          ( 'method',
+            'presentarse',
+            [],
+            [ ( 'print',
+                ('binop', '+', ('literal', 'Soy '), ('id', 'nombre')))])]),
+      ( 'func_def_params_no_return',
+        'saludar',
+        [('nombre', 'String')],
+        [('print', ('binop', '+', ('literal', 'Hola '), ('id', 'nombre')))]),
+      ('expr_stmt', ('id', 'saludar')),
+      ('expr_stmt', ('literal', 'Cristhian')),
+      ('declare', 'val', 'edad', ('literal', 25)),
+      ( 'when_stmt',
+        ('id', 'edad'),
+        [ ( 'when_case',
+            ('literal', 18),
+            [('print', ('literal', 'Mayor de edad'))]),
+          ('when_else', [('print', ('literal', 'Menor de edad'))])])])]
