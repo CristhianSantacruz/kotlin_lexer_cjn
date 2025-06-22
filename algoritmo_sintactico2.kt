@@ -8,10 +8,11 @@ if (edad >= 18) {
 }
 
 fun saludar() {
-    println("Hola mundo")
+    println("Hola mundo!!")
 }
 
-val entrada = readLine()
-println(entrada)
+
+val nombre = readLine()
+println("Hola, " + nombre)
 
 val resultado = 3 + 4 * 2

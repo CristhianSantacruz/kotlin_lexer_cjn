@@ -315,6 +315,61 @@ def p_error(p):
 # Parser
 parser = yacc.yacc()
 
+
+#INTERPRETE
+contexto = {}
+
+def ejecutar_programa(arbol):
+    contexto = {}
+    for nodo in arbol:
+        ejecutar_nodo(nodo, contexto)
+
+def ejecutar_nodo(nodo, contexto):
+    tipo = nodo[0]
+
+    if tipo == "declare":
+        _, modo, nombre, valor_expr = nodo
+        valor = evaluar_expresion(valor_expr, contexto)
+        contexto[nombre] = valor
+
+    elif tipo == "print":
+        _, expr = nodo
+        valor = evaluar_expresion(expr, contexto)
+        print(valor)
+
+    elif tipo == "expr_stmt":
+        evaluar_expresion(nodo[1], contexto)
+
+    elif tipo == "func_def_no_params_no_return":
+        # No ejecutamos funciones aún, pero podrías almacenarlas en contexto si lo deseas
+        print(f"Función '{nodo[1]}' definida pero no ejecutada automáticamente.")
+
+
+def evaluar_expresion(expr, contexto):
+    if expr[0] == "literal":
+        return expr[1]
+
+    elif expr[0] == "id":
+        nombre = expr[1]
+        return contexto.get(nombre, f"<{nombre} no definido>")
+
+    elif expr[0] == "readLine":
+        return input("📥 Ingresa un valor: ")
+
+    elif expr[0] == "binop":
+        _, op, izq, der = expr
+        val_izq = evaluar_expresion(izq, contexto)
+        val_der = evaluar_expresion(der, contexto)
+
+        if op == "+":
+            return str(val_izq) + str(val_der)
+        elif op == "-":
+            return float(val_izq) - float(val_der)
+        elif op == "*":
+            return float(val_izq) * float(val_der)
+        elif op == "/":
+            return float(val_izq) / float(val_der)
+
 # Función para probar parser
 # Función para analizar un archivo y guardar el log
 def analizar_archivo_sintactico(nombre_archivo, usuario_git="usuarioGit"):
@@ -325,8 +380,10 @@ def analizar_archivo_sintactico(nombre_archivo, usuario_git="usuarioGit"):
         with open(nombre_archivo, "r", encoding="utf-8") as archivo:
             contenido = archivo.read()
 
-        print(f"📘 Analizando archivo: {nombre_archivo}")
+        print(f"-Analizando archivo: {nombre_archivo}")
         resultado = parser.parse(contenido)
+        if resultado:
+            ejecutar_programa(resultado)
 
         now = datetime.now()
         timestamp = now.strftime("%d%m%Y-%Hh%M")
@@ -355,6 +412,11 @@ def analizar_archivo_sintactico(nombre_archivo, usuario_git="usuarioGit"):
 
     except FileNotFoundError:
         print(f"Archivo '{nombre_archivo}' no encontrado.")
+
+
+
+
+
 
 
 analizar_archivo_sintactico("algoritmo_sintactico1.kt", usuario_git="JDC1907")
