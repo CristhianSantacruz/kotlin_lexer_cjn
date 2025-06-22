@@ -16,3 +16,4 @@ val nombre = readLine()
 println("Hola, " + nombre)
 
 val resultado = 3 + 4 * 2
+println(resultado)

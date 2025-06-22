@@ -1,6 +1,6 @@
 === LOG DE ANALISIS SINTACTICO ===
 Usuario: JDC1907
-Fecha y hora: 21062025-19h31
+Fecha y hora: 21062025-19h36
 Archivo: algoritmo_sintactico1.kt
 
 Código fuente analizado:

@@ -1,6 +1,6 @@
 === LOG DE ANALISIS SINTACTICO ===
 Usuario: NoeSaltos
-Fecha y hora: 21062025-19h32
+Fecha y hora: 21062025-19h36
 Archivo: algoritmo_sintactico2.kt
 
 Código fuente analizado:
@@ -23,6 +23,7 @@ val nombre = readLine()
 println("Hola, " + nombre)
 
 val resultado = 3 + 4 * 2
+println(resultado)
 
 ----------------------------------------
 
@@ -48,4 +49,5 @@ Sintaxis válida. Resultado del análisis:
     ( 'binop',
       '+',
       ('literal', 3),
-      ('binop', '*', ('literal', 4), ('literal', 2))))]
+      ('binop', '*', ('literal', 4), ('literal', 2)))),
+  ('print', ('id', 'resultado'))]

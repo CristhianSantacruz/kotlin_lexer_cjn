@@ -354,21 +354,31 @@ def evaluar_expresion(expr, contexto):
         return contexto.get(nombre, f"<{nombre} no definido>")
 
     elif expr[0] == "readLine":
-        return input("📥 Ingresa un valor: ")
+        return input(" Ingresa un valor: ")
 
     elif expr[0] == "binop":
         _, op, izq, der = expr
         val_izq = evaluar_expresion(izq, contexto)
         val_der = evaluar_expresion(der, contexto)
 
+        # Convierte a float solo si ambos son numéricos
+        try:
+            val_izq = float(val_izq)
+            val_der = float(val_der)
+        except ValueError:
+            pass  # Si no son números, se mantendrán como string para concatenar con +
+
         if op == "+":
-            return str(val_izq) + str(val_der)
+            if isinstance(val_izq, str) or isinstance(val_der, str):
+                return str(val_izq) + str(val_der)
+            else:
+                return val_izq + val_der
         elif op == "-":
-            return float(val_izq) - float(val_der)
+            return val_izq - val_der
         elif op == "*":
-            return float(val_izq) * float(val_der)
+            return val_izq * val_der
         elif op == "/":
-            return float(val_izq) / float(val_der)
+            return val_izq / val_der
 
 # Función para probar parser
 # Función para analizar un archivo y guardar el log
@@ -415,10 +425,9 @@ def analizar_archivo_sintactico(nombre_archivo, usuario_git="usuarioGit"):
 
 
 
-
+#Fin Noelia Saltos Hernandez
 
 
 
 analizar_archivo_sintactico("algoritmo_sintactico1.kt", usuario_git="JDC1907")
 analizar_archivo_sintactico("algoritmo_sintactico2.kt", usuario_git="NoeSaltos")
-#Fin Noelia Saltos
