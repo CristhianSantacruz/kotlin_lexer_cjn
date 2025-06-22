@@ -38,7 +38,8 @@ def p_statement_list_empty(p):
 def p_statement(p):
     '''statement : declaration
                  | function_def
-                 | function_def_no_return
+                 | function_def_params_no_return
+                 | function_def_no_params_no_return
                  | class_def
                  | for_loop
                  | when_stmt
@@ -46,6 +47,7 @@ def p_statement(p):
                  | return_stmt
                  | expression_stmt'''
     p[0] = p[1]
+
 
 
 
@@ -231,9 +233,9 @@ def p_when_stmt_without_expr(p):
     p[0] = ("when_stmt_no_expr", p[3])
 
 # Función sin retorno
-def p_function_def_no_return(p):
-    """function_def_no_return : FUN ID LPAREN param_list_opt RPAREN block"""
-    p[0] = ("func_def_no_return", p[2], p[4], p[6])
+def p_function_def_params_no_return(p):
+    """function_def_params_no_return : FUN ID LPAREN param_list RPAREN block"""
+    p[0] = ("func_def_params_no_return", p[2], p[4], p[6])
 
 
 
@@ -278,6 +280,8 @@ def p_method_def(p):
 
 # Termina Cristhian Santacruz
 
+
+
 # Comienza Noelia Saltos
 def p_expression_arrayof(p):
     """expression : ARRAYOF LPAREN expression_list RPAREN"""
@@ -288,9 +292,9 @@ def p_if_else(p):
     p[0] = ("if_else", p[3], p[5], p[7])
 
 
-def p_function_def_no_return(p):
-    """function_def_no_return : FUN ID LPAREN param_list_opt RPAREN block"""
-    p[0] = ("func_def_no_return", p[2], p[4], p[6])
+def p_function_def_no_params_no_return(p):
+    """function_def_no_params_no_return : FUN ID LPAREN RPAREN block"""
+    p[0] = ("func_def_no_params_no_return", p[2], [], p[5])
 
 def p_expression_readline(p):
     '''expression : READLINE LPAREN RPAREN'''
@@ -353,6 +357,7 @@ def analizar_archivo_sintactico(nombre_archivo, usuario_git="usuarioGit"):
         print(f"Archivo '{nombre_archivo}' no encontrado.")
 
 
-# analizar_archivo_sintactico("algoritmo_sintactico1.kt", usuario_git="JDC1907")
+analizar_archivo_sintactico("algoritmo_sintactico1.kt", usuario_git="JDC1907")
 analizar_archivo_sintactico("algoritmo_sintactico2.kt", usuario_git="NoeSaltos")
-# analizar_archivo_sintactico("algoritmo_sintactico_mal1.kt", usuario_git="NoeSaltos")
+#analizar_archivo_sintactico("algoritmo_sintactico_mal1.kt", usuario_git="NoeSaltos")
+#Fin Noelia Saltos
