@@ -17,6 +17,45 @@ precedence = (
 )
 
 
+context_semantico = {
+    'en_funcion': False,
+    'en_bucle': False,
+    'nivel_bucle': 0,
+    'funciones_definidas': set(),
+    'variables_definidas': set(),
+    'tipos_variables': {},
+    'parametros_funcion_actual': [],
+    'tipo_retorno_funcion_actual': None
+}
+
+errors_semanticos = []
+
+
+def reset_context_semantico():
+    global context_semantico, errors_semanticos
+    context_semantico = {
+        'en_funcion': False,
+        'en_bucle': False,
+        'nivel_bucle': 0,
+        'funciones_definidas': set(),
+        'variables_definidas': set(),
+        'tipos_variables': {},
+        'parametros_funcion_actual': [],
+        'tipo_retorno_funcion_actual': None
+    }
+    errors_semanticos = []
+    return
+
+def add_error_semantico(mensaje, lineno=None):
+    """Agrega un error semántico a la lista"""
+    if lineno:
+        error_msg = f"Error semántico en línea {lineno}: {mensaje}"
+    else:
+        error_msg = f"Error semántico: {mensaje}"
+    errors_semanticos.append(error_msg)
+    print(error_msg)
+
+
 # Reglas sintácticas generales
 def p_program(p):
     """program : statement_list"""
@@ -45,6 +84,9 @@ def p_statement(p):
                  | when_stmt
                  | print_stmt
                  | return_stmt
+                 | break_stmt
+                 | continue_stmt
+                 | if_else
                  | expression_stmt'''
     p[0] = p[1]
 
@@ -280,6 +322,41 @@ def p_method_def(p):
 
 # Termina Cristhian Santacruz
 
+#Semantico Cristhian Santacruz
+
+def p_break_stmt(p):
+    """break_stmt : BREAK"""
+    if not context_semantico['en_bucle']:
+        add_error_semantico("'break' solo puede usarse dentro de un bucle", getattr(p, 'lineno', None))
+    p[0] = ("break",)
+
+def p_continue_stmt(p):
+    """continue_stmt : CONTINUE"""
+    if not context_semantico['en_bucle']:
+        add_error_semantico("'continue' solo puede usarse dentro de un bucle", getattr(p, 'lineno', None))
+    p[0] = ("continue",)
+
+def inferir_tipo_expresion(expr):
+    """Función auxiliar para inferir tipos básicos de expresiones"""
+    if isinstance(expr, tuple) and len(expr) > 1:
+        if expr[0] == "literal":
+            value = expr[1]
+            if isinstance(value, bool):
+                return "Boolean"
+            elif isinstance(value, int):
+                return "Int"
+            elif isinstance(value, float):
+                return "Double"
+            elif isinstance(value, str):
+                return "String"
+    return "Unknown"
+
+#Se agrego la función inferir_tipo_expresion para poder inferir el tipo de una expresión
+
+# Se analizo tambien la semantica de la estructura de control if-else
+ 
+#Fin Semantico Cristhian Santacruz
+
 
 
 # Comienza Noelia Saltos
@@ -288,9 +365,11 @@ def p_expression_arrayof(p):
     p[0] = ("arrayOf", p[3])
 
 def p_if_else(p):
-    '''statement : IF LPAREN expression RPAREN block ELSE block'''
+    '''if_else : IF LPAREN expression RPAREN block ELSE block'''
+    expr_tipo = inferir_tipo_expresion(p[3])
+    if expr_tipo != "Unknown" and expr_tipo != "Boolean":
+        add_error_semantico(f"La condición del if debe ser de tipo Boolean, se encontró '{expr_tipo}'", getattr(p, 'lineno', None))
     p[0] = ("if_else", p[3], p[5], p[7])
-
 
 def p_function_def_no_params_no_return(p):
     """function_def_no_params_no_return : FUN ID LPAREN RPAREN block"""
@@ -428,7 +507,74 @@ def analizar_archivo_sintactico(nombre_archivo, usuario_git="usuarioGit"):
 #Fin Noelia Saltos Hernandez
 
 
+##Funcion para analizar un archivo y guardar el log 
+def analizar_archivo_sintactico_semantico(nombre_archivo, usuario_git="usuarioGit"):
+    global errores_sintacticos
+    errores_sintacticos = []
+    reset_context_semantico()  
 
-analizar_archivo_sintactico("algoritmo_sintactico1.kt", usuario_git="JDC1907")
-analizar_archivo_sintactico("algoritmo_sintactico2.kt", usuario_git="NoeSaltos")
-analizar_archivo_sintactico("algoritmo_sintactico3.kt", usuario_git="CristhianSantacruz")
+    try:
+        with open(nombre_archivo, "r", encoding="utf-8") as archivo:
+            contenido = archivo.read()
+
+        print(f"-Analizando archivo: {nombre_archivo}")
+        resultado = parser.parse(contenido)
+        
+        if resultado and not errores_sintacticos:
+            ejecutar_programa(resultado)
+
+        now = datetime.now()
+        timestamp = now.strftime("%d%m%Y-%Hh%M")
+        log_filename = f"logs/sintactico-semantico-{usuario_git}-{timestamp}.txt"
+        os.makedirs("logs", exist_ok=True)
+
+        with open(log_filename, "w", encoding="utf-8") as f:
+            f.write("=== LOG DE ANALISIS SINTACTICO-SEMANTICO ===\n")
+            f.write(f"Usuario: {usuario_git}\n")
+            f.write(f"Fecha y hora: {timestamp}\n")
+            f.write(f"Archivo: {nombre_archivo}\n\n")
+            f.write("Código fuente analizado:\n")
+            f.write("-" * 40 + "\n")
+            f.write(contenido + "\n")
+            f.write("-" * 40 + "\n\n")
+            
+            # Errores sintácticos
+            if errores_sintacticos:
+                f.write("❌ ERRORES DE SINTAXIS:\n")
+                for error in errores_sintacticos:
+                    f.write(f"  {error}\n")
+                f.write("\n")
+            else:
+                f.write("✅ Análisis sintáctico exitoso\n\n")
+            
+            # Errores semánticos
+            if errors_semanticos:
+                f.write("❌ ERRORES SEMÁNTICOS:\n")
+                for error in errors_semanticos:
+                    f.write(f"  {error}\n")
+                f.write("\n")
+            else:
+                f.write("✅ Análisis semántico exitoso\n\n")
+            
+            # Información del contexto semántico
+            f.write("=== INFORMACIÓN SEMÁNTICA ===\n")
+            f.write(f"Funciones definidas: {list(context_semantico['funciones_definidas'])}\n")
+            f.write(f"Variables definidas: {list(context_semantico['variables_definidas'])}\n")
+            f.write(f"Tipos de variables: {context_semantico['tipos_variables']}\n\n")
+            
+            # Resultado del análisis sintáctico
+            if resultado and not errores_sintacticos:
+                f.write("=== ARBOL SINTACTICO ===\n")
+                f.write(pformat(resultado, indent=2, width=80))
+                f.write("\n")
+
+        print("Log generado:", log_filename)
+
+    except FileNotFoundError:
+        print(f"Archivo '{nombre_archivo}' no encontrado.")
+
+
+#analizar_archivo_sintactico("algoritmo_sintactico1.kt", usuario_git="JDC1907")
+#analizar_archivo_sintactico("algoritmo_sintactico2.kt", usuario_git="NoeSaltos")
+#analizar_archivo_sintactico("algoritmo_sintactico3.kt", usuario_git="CristhianSantacruz")
+analizar_archivo_sintactico_semantico("algoritmo_semantico1.kt", usuario_git="CristhianSantacruz")
