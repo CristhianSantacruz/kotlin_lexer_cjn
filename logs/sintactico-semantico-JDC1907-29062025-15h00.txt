@@ -1,0 +1,19 @@
+=== LOG DE ANALISIS SINTACTICO-SEMANTICO ===
+Usuario: JDC1907
+Fecha y hora: 29062025-15h00
+Archivo: algoritmo_semantico2.kt
+
+Código fuente analizado:
+----------------------------------------
+
+----------------------------------------
+
+✅ Análisis sintáctico exitoso
+
+✅ Análisis semántico exitoso
+
+=== INFORMACIÓN SEMÁNTICA ===
+Funciones definidas: []
+Variables definidas: []
+Tipos de variables: {}
+

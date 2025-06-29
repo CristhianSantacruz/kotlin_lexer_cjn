@@ -652,3 +652,4 @@ def analizar_archivo_sintactico_semantico(nombre_archivo, usuario_git="usuarioGi
 #analizar_archivo_sintactico("algoritmo_sintactico2.kt", usuario_git="NoeSaltos")
 #analizar_archivo_sintactico("algoritmo_sintactico3.kt", usuario_git="CristhianSantacruz")
 analizar_archivo_sintactico_semantico("algoritmo_semantico1.kt", usuario_git="CristhianSantacruz")
+analizar_archivo_sintactico_semantico("algoritmo_semantico2.kt", usuario_git="JDC1907")
