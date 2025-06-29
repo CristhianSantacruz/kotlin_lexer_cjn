@@ -107,6 +107,12 @@ def p_declaration(p):
 # Función con valor de retorno
 def p_function_def(p):
     """function_def : FUN ID LPAREN param_list_opt RPAREN COLON type block"""
+    #------Jahir Díaz, prueba de la regla semantica---------
+    context_semantico['tipo_retorno_funcion_actual'] = p[7]
+    context_semantico['en_funcion'] = True
+    verificar_tipo_retorno_funcion(p)  # <- Validación semántica
+    context_semantico['en_funcion'] = False
+    #------Jahir Díaz, prueba de la regla semantica---------
     p[0] = ("func_def", p[2], p[4], p[7], p[8])
 
 def p_param_list_opt(p):
@@ -315,12 +321,77 @@ def p_property_def(p):
         p[0] = ("property", p[1], p[2], p[4], None)
     else:
         p[0] = ("property", p[1], p[2], p[4], p[6])
+        #------Jahir Díaz, prueba de la regla semantica---------
+        verificar_asignacion_tipada(p)
+        #------Jahir Díaz, prueba de la regla semantica---------
 
 def p_method_def(p):
     """method_def : FUN ID LPAREN param_list_opt RPAREN block"""
     p[0] = ("method", p[2], p[4], p[6])
 
 # Termina Cristhian Santacruz
+
+#TERCER AVANCE, CON FECHA DE ENTREGA DEL 29/06/2025
+
+#Inicio Semantico Jahir Díaz Cedeño
+# Verificación semántica de tipos
+
+def inferir_tipo_expresion(expr):
+    if isinstance(expr, tuple) and len(expr) > 1:
+        if expr[0] == "literal":
+            value = expr[1]
+            if isinstance(value, bool):
+                return "Boolean"
+            elif isinstance(value, int):
+                return "Int"
+            elif isinstance(value, float):
+                return "Double"
+            elif isinstance(value, str):
+                return "String"
+    return "Unknown"
+
+def verificar_asignacion_tipada(p):
+    if len(p) == 7:
+        tipo = p[4]  # tipo explícito
+        expr = p[6]
+        tipo_expr = inferir_tipo_expresion(expr)
+        if tipo_expr != "Unknown" and tipo_expr != tipo:
+            add_error_semantico(f"Tipo incompatible en la asignación. Esperado '{tipo}', pero se encontró '{tipo_expr}'", getattr(p, 'lineno', None))
+
+        # Validación específica para Boolean (true/false solamente)
+        if tipo == "Boolean" and tipo_expr != "Boolean":
+            add_error_semantico(f"Tipo inválido para Boolean. Solo se permite true o false, se encontró '{tipo_expr}'", getattr(p, 'lineno', None))
+
+#Se implementaron dos reglas semánticas para la validación de tipos en asignaciones.
+#La primera regla verifica que el tipo declarado de una variable coincida con el tipo inferido de la expresión asignada, generando un error semántico si son incompatibles.
+#La segunda regla añade una validación específica para variables del tipo Boolean, asegurando que únicamente acepten los valores true o false como asignación válida.
+
+#Inicio Semantico Jahir Díaz Cedeño
+def verificar_tipo_retorno_funcion(p):
+    tipo_esperado = context_semantico['tipo_retorno_funcion_actual']
+    if tipo_esperado is not None:
+        valor = p[2]
+        tipo_real = inferir_tipo_expresion(valor)
+        if tipo_real != tipo_esperado:
+            add_error_semantico(f"Tipo de retorno incorrecto. Se esperaba '{tipo_esperado}' pero se obtuvo '{tipo_real}'", getattr(p, 'lineno', None))
+
+def validar_funcion_unit_sin_return(body):
+    for sentencia in body:
+        if isinstance(sentencia, tuple) and sentencia[0] == "return":
+            add_error_semantico("Una función sin tipo de retorno no debe contener una instrucción return con valor.")
+
+
+
+
+#Fin Semantico Jahir Díaz Cedeño
+
+#Fin Semantico Jahir Díaz Cedeño
+
+#Inicio Semantico Noelia Saltos Hernandez
+
+
+#Fin Semantico Noelia Saltos Hernandez
+
 
 #Semantico Cristhian Santacruz
 
@@ -373,6 +444,9 @@ def p_if_else(p):
 
 def p_function_def_no_params_no_return(p):
     """function_def_no_params_no_return : FUN ID LPAREN RPAREN block"""
+    #------Jahir Díaz, prueba de la regla semantica---------
+    validar_funcion_unit_sin_return(p[5])
+    #------Jahir Díaz, prueba de la regla semantica---------
     p[0] = ("func_def_no_params_no_return", p[2], [], p[5])
 
 def p_expression_readline(p):
