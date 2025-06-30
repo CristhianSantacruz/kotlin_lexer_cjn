@@ -389,7 +389,8 @@ def validar_funcion_unit_sin_return(body):
     for sentencia in body:
         if isinstance(sentencia, tuple) and sentencia[0] == "return":
             add_error_semantico("Una función sin tipo de retorno no debe contener una instrucción return con valor.")
-
+# La primera regla valida que el tipo de valor retornado en una función coincida con el tipo de retorno declarado.
+# La segunda regla verifica que las funciones declaradas sin tipo de retorno (Unit) no contengan instrucciones return con valores, ya que esto violaría su definición.
 
 
 
@@ -698,5 +699,5 @@ def analizar_archivo_sintactico_semantico(nombre_archivo, usuario_git="usuarioGi
 #analizar_archivo_sintactico("algoritmo_sintactico2.kt", usuario_git="NoeSaltos")
 #analizar_archivo_sintactico("algoritmo_sintactico3.kt", usuario_git="CristhianSantacruz")
 #analizar_archivo_sintactico_semantico("algoritmo_semantico3.kt", usuario_git="CristhianSantacruz")
-#analizar_archivo_sintactico_semantico("algoritmo_semantico1.kt", usuario_git="JDC1907")
-analizar_archivo_sintactico_semantico("algoritmo_semantico2.kt", usuario_git="NoeSaltos")
+analizar_archivo_sintactico_semantico("algoritmo_semantico1.kt", usuario_git="JDC1907")
+#analizar_archivo_sintactico_semantico("algoritmo_semantico2.kt", usuario_git="NoeSaltos")
