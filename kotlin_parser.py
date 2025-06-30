@@ -55,6 +55,13 @@ def add_error_semantico(mensaje, lineno=None):
     errors_semanticos.append(error_msg)
     print(error_msg)
 
+def get_lineno(p, index=1):
+    """Obtiene el número de línea del token en la posición dada"""
+    try:
+        return p.lineno(index)
+    except:
+        return None
+
 
 # Reglas sintácticas generales
 def p_program(p):
@@ -79,6 +86,7 @@ def p_statement(p):
                  | function_def
                  | function_def_params_no_return
                  | function_def_no_params_no_return
+                 | function_def_no_params_with_return
                  | class_def
                  | for_loop
                  | when_stmt
@@ -113,6 +121,7 @@ def p_function_def(p):
     #------Jahir Díaz, prueba de la regla semantica---------
     context_semantico['tipo_retorno_funcion_actual'] = p[7]
     context_semantico['en_funcion'] = True
+    context_semantico['funciones_definidas'].add(p[2])
     verificar_tipo_retorno_funcion(p)  # <- Validación semántica
     context_semantico['en_funcion'] = False
     #------Jahir Díaz, prueba de la regla semantica---------
@@ -444,15 +453,27 @@ def verificar_variables_declaradas(expr):
 
 def p_break_stmt(p):
     """break_stmt : BREAK"""
-    if not context_semantico['en_bucle']:
-        add_error_semantico("'break' solo puede usarse dentro de un bucle", getattr(p, 'lineno', None))
+   
     p[0] = ("break",)
 
 def p_continue_stmt(p):
     """continue_stmt : CONTINUE"""
-    if not context_semantico['en_bucle']:
-        add_error_semantico("'continue' solo puede usarse dentro de un bucle", getattr(p, 'lineno', None))
+    
     p[0] = ("continue",)
+
+def p_function_def_no_params_with_return(p):
+    """function_def_no_params_with_return : FUN ID LPAREN RPAREN COLON type block"""
+    # Establecer contexto antes de procesar
+    context_semantico['en_funcion'] = True
+    context_semantico['funciones_definidas'].add(p[2])
+    context_semantico['tipo_retorno_funcion_actual'] = p[6]
+    
+    # El bloque ya fue procesado por el parser con el contexto activo
+    # Ahora restablecer el contexto después del procesamiento
+    context_semantico['en_funcion'] = False
+    context_semantico['tipo_retorno_funcion_actual'] = None
+    p[0] = ("func_def_no_params_with_return", p[2], [], p[6], p[7])
+
 
 def inferir_tipo_expresion(expr):
     """Función auxiliar para inferir tipos básicos de expresiones"""
@@ -472,7 +493,70 @@ def inferir_tipo_expresion(expr):
 #Se agrego la función inferir_tipo_expresion para poder inferir el tipo de una expresión
 
 # Se analizo tambien la semantica de la estructura de control if-else
- 
+def verificar_semantica_completa(ast):
+    """Verificar todas las reglas semánticas después de construir el AST"""
+    for nodo in ast:
+        verificar_nodo_semantica(nodo, contexto_local={'en_funcion': False, 'en_bucle': False})
+
+def verificar_nodo_semantica(nodo, contexto_local):
+    """Verificar semántica de un nodo recursivamente"""
+    if not isinstance(nodo, tuple):
+        return
+        
+    tipo = nodo[0]
+
+    print("ESTAMOS VERIFICANDO NODOS")
+    
+    if tipo in ['func_def', 'func_def_no_params_with_return', 'func_def_params_no_return', 'func_def_no_params_no_return']:
+        # Estamos entrando a una función
+        nuevo_contexto = contexto_local.copy()
+        nuevo_contexto['en_funcion'] = True
+        
+        # Verificar el cuerpo de la función
+        cuerpo = nodo[-1]  # El cuerpo suele ser el último elemento
+        if isinstance(cuerpo, list):
+            for stmt in cuerpo:
+                verificar_nodo_semantica(stmt, nuevo_contexto)
+                
+    elif tipo == 'for':
+        print("ESTAMOS DENTOR DE UN FOR")
+        # Estamos entrando a un bucle for
+        nuevo_contexto = contexto_local.copy()
+        nuevo_contexto['en_bucle'] = True
+        
+        # Verificar el cuerpo del bucle (último elemento)
+        cuerpo = nodo[-1]  # El cuerpo del for
+        if isinstance(cuerpo, list):
+            for stmt in cuerpo:
+                verificar_nodo_semantica(stmt, nuevo_contexto)
+        else:
+            verificar_nodo_semantica(cuerpo, nuevo_contexto)
+                
+    elif tipo == 'return':
+        if not contexto_local.get('en_funcion', False):
+            add_error_semantico("'return' solo puede usarse dentro de una función")
+            
+    elif tipo == 'break':
+        if not contexto_local.get('en_bucle', False):
+            add_error_semantico("'break' solo puede usarse dentro de un bucle")
+            
+    elif tipo == 'continue':
+        if not contexto_local.get('en_bucle', False):
+            add_error_semantico("'continue' solo puede usarse dentro de un bucle")
+            
+    else:
+        # Verificar recursivamente otros nodos
+        for i in range(1, len(nodo)):
+            child = nodo[i]
+            if isinstance(child, (list, tuple)):
+                if isinstance(child, list):
+                    for item in child:
+                        verificar_nodo_semantica(item, contexto_local)
+                else:
+                    verificar_nodo_semantica(child, contexto_local)
+
+
+
 #Fin Semantico Cristhian Santacruz
 
 
@@ -592,9 +676,9 @@ def analizar_archivo_sintactico(nombre_archivo, usuario_git="usuarioGit"):
 
         print(f"-Analizando archivo: {nombre_archivo}")
         resultado = parser.parse(contenido)
-        if resultado:
-            ejecutar_programa(resultado)
+       
 
+        
         now = datetime.now()
         timestamp = now.strftime("%d%m%Y-%Hh%M")
         log_filename = f"logs/sintactico-{usuario_git}-{timestamp}.txt"
@@ -633,6 +717,7 @@ def analizar_archivo_sintactico_semantico(nombre_archivo, usuario_git="usuarioGi
     global errores_sintacticos
     errores_sintacticos = []
     reset_context_semantico()  
+   
 
     try:
         with open(nombre_archivo, "r", encoding="utf-8") as archivo:
@@ -641,7 +726,13 @@ def analizar_archivo_sintactico_semantico(nombre_archivo, usuario_git="usuarioGi
         print(f"-Analizando archivo: {nombre_archivo}")
         resultado = parser.parse(contenido)
         
-        if resultado and not errores_sintacticos:
+        if resultado:
+            print("ESTAMOS VERIFICANDO SEMANTICA COMPLETA")
+            verificar_semantica_completa(resultado)
+            if not errores_sintacticos:
+                ejecutar_programa(resultado)
+        
+        if resultado and not errores_sintacticos and not errors_semanticos:
             ejecutar_programa(resultado)
 
         now = datetime.now()
@@ -698,6 +789,6 @@ def analizar_archivo_sintactico_semantico(nombre_archivo, usuario_git="usuarioGi
 #analizar_archivo_sintactico("algoritmo_sintactico1.kt", usuario_git="JDC1907")
 #analizar_archivo_sintactico("algoritmo_sintactico2.kt", usuario_git="NoeSaltos")
 #analizar_archivo_sintactico("algoritmo_sintactico3.kt", usuario_git="CristhianSantacruz")
-#analizar_archivo_sintactico_semantico("algoritmo_semantico3.kt", usuario_git="CristhianSantacruz")
+analizar_archivo_sintactico_semantico("algoritmo_semantico3.kt", usuario_git="CristhianSantacruz")
 analizar_archivo_sintactico_semantico("algoritmo_semantico1.kt", usuario_git="JDC1907")
-#analizar_archivo_sintactico_semantico("algoritmo_semantico2.kt", usuario_git="NoeSaltos")
+analizar_archivo_sintactico_semantico("algoritmo_semantico2.kt", usuario_git="NoeSaltos")

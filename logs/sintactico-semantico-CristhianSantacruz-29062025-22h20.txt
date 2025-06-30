@@ -1,0 +1,37 @@
+=== LOG DE ANALISIS SINTACTICO-SEMANTICO ===
+Usuario: CristhianSantacruz
+Fecha y hora: 29062025-22h20
+Archivo: algoritmo_semantico3.kt
+
+Código fuente analizado:
+----------------------------------------
+fun saludar(): String {
+    return "Hola mundo"
+}
+
+fun calcular() {
+    return "Hola mundo"
+}
+
+break;
+
+continue;
+
+for ( i in listOf(1, 2, 3)) {
+    break;
+    continue;
+}
+----------------------------------------
+
+❌ ERRORES DE SINTAXIS:
+  Error de sintaxis en token 'SEMICOLON' (valor: ;) en la línea 9
+  Error de sintaxis en token 'SEMICOLON' (valor: ;) en la línea 14
+
+❌ ERRORES SEMÁNTICOS:
+  Error semántico: Una función sin tipo de retorno no debe contener una instrucción return con valor.
+
+=== INFORMACIÓN SEMÁNTICA ===
+Funciones definidas: ['saludar']
+Variables definidas: []
+Tipos de variables: {}
+
