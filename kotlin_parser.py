@@ -103,6 +103,9 @@ def p_declaration(p):
     '''declaration : VAR ID ASSIGN expression
                    | VAL ID ASSIGN expression'''
     p[0] = ("declare", p[1], p[2], p[4])
+    #------Noelia Saltos, prueba de la regla semantica---------
+    context_semantico['variables_definidas'].add(p[2])
+    #------Noelia Saltos, Fin prueba de la regla semantica---------
 
 # Función con valor de retorno
 def p_function_def(p):
@@ -185,6 +188,10 @@ def p_expression_binary(p):
                   | expression AND expression
                   | expression OR expression'''
     p[0] = ("binop", p[2], p[1], p[3])
+    # -- Noelia Saltos, prueba de la regla semantica---------
+    verificar_operacion_binaria_compatible(p[0])
+    # -- Noelia Saltos, Fin prueba de la regla semantica---------
+
 
 def p_expression_unary(p):
     """expression : MINUS expression %prec UMINUS"""
@@ -205,6 +212,9 @@ def p_expression_literal(p):
 def p_expression_id(p):
     """expression : ID"""
     p[0] = ("id", p[1])
+    # -- Noelia Saltos, prueba de la regla semantica---------
+    verificar_variables_declaradas(('use_var', p[1]))
+    # ------------Fin Noelia Saltos
 
 # Impresión
 def p_print_stmt(p):
@@ -389,6 +399,42 @@ def validar_funcion_unit_sin_return(body):
 
 #Inicio Semantico Noelia Saltos Hernandez
 
+# 1era Regla .- Se valida que las operaciones entre variables o literales se realicen entre tipos compatibles.
+# 2da Regla .- Y se verifica que las comparaciones lógicas se hagan entre tipos compatibles.
+
+def verificar_operacion_binaria_compatible(expr):
+    if expr[0] == "binop":
+        _, op, izq, der = expr
+        tipo_izq = inferir_tipo_expresion(izq)
+        tipo_der = inferir_tipo_expresion(der)
+
+        if op == '+':
+            # Permitir Int + Int, Double + Double, Int + Double, String + String
+            if (tipo_izq in ["Int", "Double"] and tipo_der in ["Int", "Double"]) or (tipo_izq == "String" and tipo_der == "String"):
+                return
+            else:
+                add_error_semantico(f"Operación '+' incompatible entre '{tipo_izq}' y '{tipo_der}'")
+
+        elif op in ['-', '*', '/']:
+            if tipo_izq not in ["Int", "Double"] or tipo_der not in ["Int", "Double"]:
+                add_error_semantico(f"Operación '{op}' incompatible entre '{tipo_izq}' y '{tipo_der}'")
+
+        elif op in ['>', '<', '>=', '<=', '==', '!=']:
+            if tipo_izq != tipo_der:
+                add_error_semantico(f"Comparación entre tipos incompatibles: '{tipo_izq}' y '{tipo_der}'")
+
+# 3era Regla .- Se verifica las variables no deben ser usadas antes de ser declaradas
+def verificar_variables_declaradas(expr):
+    if isinstance(expr, tuple):
+        if expr[0] == 'var':
+            varname = expr[1]
+            context_semantico['variables_definidas'].add(varname)
+        elif expr[0] == 'use_var':
+            varname = expr[1]
+            if varname not in context_semantico['variables_definidas']:
+                add_error_semantico(f"La variable '{varname}' se está usando antes de ser declarada.")
+
+ 
 
 #Fin Semantico Noelia Saltos Hernandez
 
@@ -651,5 +697,6 @@ def analizar_archivo_sintactico_semantico(nombre_archivo, usuario_git="usuarioGi
 #analizar_archivo_sintactico("algoritmo_sintactico1.kt", usuario_git="JDC1907")
 #analizar_archivo_sintactico("algoritmo_sintactico2.kt", usuario_git="NoeSaltos")
 #analizar_archivo_sintactico("algoritmo_sintactico3.kt", usuario_git="CristhianSantacruz")
-analizar_archivo_sintactico_semantico("algoritmo_semantico1.kt", usuario_git="CristhianSantacruz")
-analizar_archivo_sintactico_semantico("algoritmo_semantico2.kt", usuario_git="JDC1907")
+#analizar_archivo_sintactico_semantico("algoritmo_semantico3.kt", usuario_git="CristhianSantacruz")
+#analizar_archivo_sintactico_semantico("algoritmo_semantico1.kt", usuario_git="JDC1907")
+analizar_archivo_sintactico_semantico("algoritmo_semantico2.kt", usuario_git="NoeSaltos")
