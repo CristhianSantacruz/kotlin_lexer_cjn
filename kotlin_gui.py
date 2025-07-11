@@ -305,13 +305,14 @@ class KotlinAnalyzerGUI:
             # Simulación del análisis léxico (hasta que se conecten los módulos)
             self.tokens_output.config(state=tk.NORMAL)
             self.tokens_output.insert(tk.END, "=== ANÁLISIS LÉXICO ===\n\n")
-            self.tokens_output.insert(tk.END, "Módulo lexer aún no conectado.\n")
+            #self.tokens_output.insert(tk.END, "Módulo lexer aún no conectado.\n")
             self.tokens_output.insert(tk.END, "Código a analizar:\n")
             self.tokens_output.insert(tk.END, code[:200] + "..." if len(code) > 200 else code)
             self.tokens_output.config(state=tk.DISABLED)
             
             #__________________________________________________________________________________________________________
             # Ejecutar análisis real con el lexer
+            self.tokens_output.config(state=tk.NORMAL)
             lexer.input(code)
             while True:
                 tok: LexToken = lexer.token()
@@ -336,6 +337,8 @@ class KotlinAnalyzerGUI:
             from kotlin_parser import parser, reset_context_semantico, context_semantico, \
                                     errors_semanticos, errores_sintacticos, \
                                     verificar_semantica_completa, ejecutar_programa
+                                    
+            from kotlin_parser import errores_sintacticos, errors_semanticos
 
             reset_context_semantico()
             resultado = parser.parse(code)
@@ -363,6 +366,13 @@ class KotlinAnalyzerGUI:
 
             self.errors_output.config(state=tk.DISABLED)
 
+            self.ast_output.config(state=tk.NORMAL)
+            self.ast_output.delete(1.0, tk.END)
+            self.ast_output.config(state=tk.DISABLED)
+
+            self.execution_output.config(state=tk.NORMAL)
+            self.execution_output.delete(1.0, tk.END)
+            self.execution_output.config(state=tk.DISABLED)
             # Mostrar AST
             self.ast_output.config(state=tk.NORMAL)
             self.ast_output.insert(tk.END, "=== ÁRBOL SINTÁCTICO ABSTRACTO ===\n\n")
@@ -376,6 +386,10 @@ class KotlinAnalyzerGUI:
             # Mostrar resultado de ejecución (si no hay errores)
             self.execution_output.config(state=tk.NORMAL)
             self.execution_output.insert(tk.END, "=== SALIDA DE EJECUCIÓN ===\n\n")
+            
+            # Limpiar errores previos
+            errores_sintacticos.clear()
+            errors_semanticos.clear()
 
             if resultado and not errores_sintacticos and not errors_semanticos:
                 import io, sys

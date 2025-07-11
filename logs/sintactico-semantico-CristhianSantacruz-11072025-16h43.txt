@@ -1,0 +1,53 @@
+=== LOG DE ANALISIS SINTACTICO-SEMANTICO ===
+Usuario: CristhianSantacruz
+Fecha y hora: 11072025-16h43
+Archivo: algoritmo_semantico3.kt
+
+Código fuente analizado:
+----------------------------------------
+fun saludar(): String {
+    return "Hola mundo"
+}
+
+fun calcular() {
+    return "Hola mundo"
+}
+
+break
+
+continue
+
+for ( i in listOf(1, 2, 3)) {
+    break
+    continue
+}
+----------------------------------------
+
+✅ Análisis sintáctico exitoso
+
+❌ ERRORES SEMÁNTICOS:
+  Error semántico: Una función sin tipo de retorno no debe contener una instrucción return con valor.
+  Error semántico: 'break' solo puede usarse dentro de un bucle
+  Error semántico: 'continue' solo puede usarse dentro de un bucle
+
+=== INFORMACIÓN SEMÁNTICA ===
+Funciones definidas: ['saludar']
+Variables definidas: []
+Tipos de variables: {}
+
+=== ARBOL SINTACTICO ===
+[ ( 'func_def_no_params_with_return',
+    'saludar',
+    [],
+    'String',
+    [('return', ('literal', 'Hola mundo'))]),
+  ( 'func_def_no_params_no_return',
+    'calcular',
+    [],
+    [('return', ('literal', 'Hola mundo'))]),
+  ('break',),
+  ('continue',),
+  ( 'for',
+    'i',
+    ('listOf', [('literal', 1), ('literal', 2), ('literal', 3)]),
+    [('break',), ('continue',)])]
