@@ -6,6 +6,12 @@ from PIL import Image, ImageTk
 from datetime import datetime
 import threading
 import os
+#__________________________________
+from kotlin_lexer import lexer
+from kotlin_parser import parser, errores_sintacticos, errors_semanticos, ejecutar_programa, context_semantico
+from kotlin_parser import reset_context_semantico
+#__________________________________
+
 
 COLOR_PRINCIPAL = "#9435f2"
 COLOR_BACKGROUND = "#f2f2f2"
@@ -291,8 +297,11 @@ class KotlinAnalyzerGUI:
         threading.Thread(target=analysis_thread, daemon=True).start()
         
     def run_lexical_analysis(self, code):
+        
         """Ejecutar análisis léxico"""
         try:
+            from kotlin_lexer import lexer
+            from ply.lex import LexToken
             # Simulación del análisis léxico (hasta que se conecten los módulos)
             self.tokens_output.config(state=tk.NORMAL)
             self.tokens_output.insert(tk.END, "=== ANÁLISIS LÉXICO ===\n\n")
@@ -301,6 +310,19 @@ class KotlinAnalyzerGUI:
             self.tokens_output.insert(tk.END, code[:200] + "..." if len(code) > 200 else code)
             self.tokens_output.config(state=tk.DISABLED)
             
+            #__________________________________________________________________________________________________________
+            # Ejecutar análisis real con el lexer
+            lexer.input(code)
+            while True:
+                tok: LexToken = lexer.token()
+                if not tok:
+                    break
+                token_info = f"Token: {tok.type} - Valor: {repr(tok.value)} - Línea: {tok.lineno}"
+                self.tokens_output.insert(tk.END, token_info + "\n")
+
+            self.tokens_output.config(state=tk.DISABLED)
+            #__________________________________________________________________________________________________________
+
         except Exception as e:
             self.tokens_output.config(state=tk.NORMAL)
             self.tokens_output.insert(tk.END, f"Error en análisis léxico: {str(e)}")
@@ -309,29 +331,98 @@ class KotlinAnalyzerGUI:
     def run_syntax_semantic_analysis(self, code):
         """Ejecutar análisis sintáctico y semántico"""
         try:
-            # Simulación del análisis sintáctico/semántico
+            #__________________________________________________________________________________________________________
+            
+            from kotlin_parser import parser, reset_context_semantico, context_semantico, \
+                                    errors_semanticos, errores_sintacticos, \
+                                    verificar_semantica_completa, ejecutar_programa
+
+            reset_context_semantico()
+            resultado = parser.parse(code)
+
+            # Mostrar errores sintácticos
             self.errors_output.config(state=tk.NORMAL)
             self.errors_output.insert(tk.END, "=== ANÁLISIS SINTÁCTICO Y SEMÁNTICO ===\n\n")
-            self.errors_output.insert(tk.END, "Módulos parser aún no conectados.\n")
-            self.errors_output.insert(tk.END, "Interfaz funcionando correctamente")
+
+            if errores_sintacticos:
+                for error in errores_sintacticos:
+                    self.errors_output.insert(tk.END, error + "\n")
+            else:
+                self.errors_output.insert(tk.END, "✔ Análisis sintáctico exitoso\n")
+
+            # Verificar semántica solo si no hubo errores sintácticos
+            if resultado and not errores_sintacticos:
+                verificar_semantica_completa(resultado)
+
+            # Mostrar errores semánticos
+            if errors_semanticos:
+                for error in errors_semanticos:
+                    self.errors_output.insert(tk.END, error + "\n")
+            else:
+                self.errors_output.insert(tk.END, "✔ Análisis semántico exitoso\n")
+
             self.errors_output.config(state=tk.DISABLED)
-            
-            # AST simulado
+
+            # Mostrar AST
             self.ast_output.config(state=tk.NORMAL)
             self.ast_output.insert(tk.END, "=== ÁRBOL SINTÁCTICO ABSTRACTO ===\n\n")
-            self.ast_output.insert(tk.END, "AST se generará cuando se conecte el parser")
+            if resultado:
+                from pprint import pformat
+                self.ast_output.insert(tk.END, pformat(resultado, indent=2, width=80))
+            else:
+                self.ast_output.insert(tk.END, "⚠ No se generó AST por errores sintácticos.")
             self.ast_output.config(state=tk.DISABLED)
-            
-            # Ejecución simulada
+
+            # Mostrar resultado de ejecución (si no hay errores)
             self.execution_output.config(state=tk.NORMAL)
             self.execution_output.insert(tk.END, "=== SALIDA DE EJECUCIÓN ===\n\n")
-            self.execution_output.insert(tk.END, "Esperando conexión con el intérprete...")
+
+            if resultado and not errores_sintacticos and not errors_semanticos:
+                import io, sys
+                output_capture = io.StringIO()
+                sys_stdout_original = sys.stdout
+                sys.stdout = output_capture
+
+                try:
+                    ejecutar_programa(resultado)
+                except Exception as e:
+                    print(f"[Error durante ejecución: {str(e)}]")
+
+                sys.stdout = sys_stdout_original
+                salida = output_capture.getvalue()
+                self.execution_output.insert(tk.END, salida if salida else "[Ejecución sin salida]")
+            else:
+                self.execution_output.insert(tk.END, "No se ejecutó debido a errores.")
+
             self.execution_output.config(state=tk.DISABLED)
+
+            
+            #__________________________________________________________________________________________________________
+            
+            # Simulación del análisis sintáctico/semántico
+            #self.errors_output.config(state=tk.NORMAL)
+            #self.errors_output.insert(tk.END, "=== ANÁLISIS SINTÁCTICO Y SEMÁNTICO ===\n\n")
+            #self.errors_output.insert(tk.END, "Módulos parser aún no conectados.\n")
+            #self.errors_output.insert(tk.END, "Interfaz funcionando correctamente")
+            #self.errors_output.config(state=tk.DISABLED)
+            
+            # AST simulado
+            #self.ast_output.config(state=tk.NORMAL)
+            #self.ast_output.insert(tk.END, "=== ÁRBOL SINTÁCTICO ABSTRACTO ===\n\n")
+            #self.ast_output.insert(tk.END, "AST se generará cuando se conecte el parser")
+            #self.ast_output.config(state=tk.DISABLED)
+            
+            # Ejecución simulada
+            #self.execution_output.config(state=tk.NORMAL)
+            #self.execution_output.insert(tk.END, "=== SALIDA DE EJECUCIÓN ===\n\n")
+            #self.execution_output.insert(tk.END, "Esperando conexión con el intérprete...")
+            #self.execution_output.config(state=tk.DISABLED)
             
         except Exception as e:
             self.errors_output.config(state=tk.NORMAL)
             self.errors_output.insert(tk.END, f"Error en análisis sintáctico/semántico: {str(e)}")
             self.errors_output.config(state=tk.DISABLED)
+            
 
 def main():
     root = tk.Tk()

@@ -1,0 +1,92 @@
+=== LOG DE ANALISIS SINTACTICO-SEMANTICO ===
+Usuario: NoeSaltos
+Fecha y hora: 11072025-06h38
+Archivo: algoritmo_semantico2.kt
+
+Código fuente analizado:
+----------------------------------------
+fun main() {
+    // =======================================================
+    // 3ERA REGLA: Uso de variables antes de ser declaradas
+    // =======================================================
+
+    println(x) // Error: variable usada antes de ser declarada
+
+    val x = 10 // Declaración válida de variable
+
+    println(x) // Uso correcto después de la declaración
+
+
+    // =======================================================
+    // 1ERA REGLA: Operaciones entre tipos compatibles
+    // =======================================================
+
+    val a = 5         // Int
+    val b = 3.5       // Double
+    val bandera = true // Boolean
+
+    val sumaCorrecta = a + b       // Int + Double -> válido
+    val sumaTexto = "Hola" + "!"   // String + String -> válido
+    val sumaInvalida = bandera + a // Boolean + Int -> inválido
+
+
+    // =======================================================
+    // 2DA REGLA: Comparaciones entre tipos compatibles
+    // =======================================================
+
+    val comparacionCorrecta = a > 2              // Int > Int(valido)
+    val comparacionTexto = "Hola" == "Hola"      // String == String (valido)
+    val comparacionInvalida = "Hola" > bandera   // String > Boolean (inválido)
+
+}
+
+----------------------------------------
+
+✅ Análisis sintáctico exitoso
+
+❌ ERRORES SEMÁNTICOS:
+  Error semántico: La variable 'x' se está usando antes de ser declarada.
+  Error semántico: Operación '+' incompatible entre 'Unknown' y 'Unknown'
+  Error semántico: Operación '+' incompatible entre 'Unknown' y 'Unknown'
+  Error semántico: Comparación entre tipos incompatibles: 'Unknown' y 'Int'
+  Error semántico: Comparación entre tipos incompatibles: 'String' y 'Unknown'
+
+=== INFORMACIÓN SEMÁNTICA ===
+Funciones definidas: []
+Variables definidas: ['sumaInvalida', 'comparacionCorrecta', 'x', 'bandera', 'comparacionInvalida', 'comparacionTexto', 'sumaCorrecta', 'sumaTexto', 'a', 'b']
+Tipos de variables: {}
+
+=== ARBOL SINTACTICO ===
+[ ( 'func_def_no_params_no_return',
+    'main',
+    [],
+    [ ('print', ('id', 'x')),
+      ('declare', 'val', 'x', ('literal', 10)),
+      ('print', ('id', 'x')),
+      ('declare', 'val', 'a', ('literal', 5)),
+      ('declare', 'val', 'b', ('literal', 3.5)),
+      ('declare', 'val', 'bandera', ('literal', 'true')),
+      ( 'declare',
+        'val',
+        'sumaCorrecta',
+        ('binop', '+', ('id', 'a'), ('id', 'b'))),
+      ( 'declare',
+        'val',
+        'sumaTexto',
+        ('binop', '+', ('literal', 'Hola'), ('literal', '!'))),
+      ( 'declare',
+        'val',
+        'sumaInvalida',
+        ('binop', '+', ('id', 'bandera'), ('id', 'a'))),
+      ( 'declare',
+        'val',
+        'comparacionCorrecta',
+        ('binop', '>', ('id', 'a'), ('literal', 2))),
+      ( 'declare',
+        'val',
+        'comparacionTexto',
+        ('binop', '==', ('literal', 'Hola'), ('literal', 'Hola'))),
+      ( 'declare',
+        'val',
+        'comparacionInvalida',
+        ('binop', '>', ('literal', 'Hola'), ('id', 'bandera')))])]
