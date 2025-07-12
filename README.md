@@ -14,11 +14,11 @@ Este proyecto implementa un **analizador completo (léxico, sintáctico y semán
 ---
 
 ## 📦 Estructura del 
-├── kotlin_lexer.py # Analizador léxico
-├── kotlin_parser.py # Parser con validaciones semánticas y ejecución parcial
-├── algoritmoX.kt # Archivos de prueba con código Kotlin-like
-├── logs/ # Carpeta donde se generan los logs de análisis
-└── README.md # Este archivo
+-kotlin_lexer.py # Analizador léxico
+-kotlin_parser.py # Parser con validaciones semánticas y ejecución parcial
+-algoritmoX.kt # Archivos de prueba con código Kotlin-like
+-logs/ # Carpeta donde se generan los logs de análisis
+-README.md # Este archivo
 ---
 
 ## 🛠️ Requisitos
