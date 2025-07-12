@@ -375,6 +375,14 @@ def p_when_stmt_without_expr(p):
     """when_stmt : WHEN LBRACE when_branches RBRACE"""
     p[0] = ("when_stmt_no_expr", p[3])
 
+def p_when_branch_expression_brace(p):
+    """when_branch : expression block"""
+    p[0] = ("when_case", p[1], p[2])
+
+def p_when_branch_else_brace(p):
+    """when_branch : ELSE block"""
+    p[0] = ("when_else", p[2])
+
 # # Función sin retorno
 # def p_function_def_params_no_return(p):
 #     """function_def_params_no_return : FUN ID LPAREN param_list RPAREN block"""
@@ -857,4 +865,4 @@ def analizar_archivo_sintactico_semantico(nombre_archivo, usuario_git="usuarioGi
 #analizar_archivo_sintactico("algoritmo_sintactico3.kt", usuario_git="CristhianSantacruz")
 # analizar_archivo_sintactico_semantico("algoritmo_semantico3.kt", usuario_git="CristhianSantacruz")
 # analizar_archivo_sintactico_semantico("algoritmo_semantico1.kt", usuario_git="JDC1907")
-analizar_archivo_sintactico_semantico("algoritmo.kt", usuario_git="NoeSaltos")
+analizar_archivo_sintactico_semantico("algoritmo_prueba.kt", usuario_git="NoeSaltos")

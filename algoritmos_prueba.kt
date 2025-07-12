@@ -1,31 +1,25 @@
-// Función con retorno correcto
-fun duplicar(x: Int): Int {
-    return x * 2
-}
-
-// Función sin retorno (Unit)
-fun mostrarMensaje(msg: String) {
-    println("Mensaje: " + msg)
+fun mostrarMensaje(nombre: String) {
+    println("Bienvenido " + nombre)
 }
 
 fun main() {
-    var nombre = "Kotlin"
-    val edad = 10
-    val activo = true
-    val promedio = 8.75
+    val listaNombres = listOf("Ana", "Luis", "Pedro")
 
-    println("Bienvenido " + nombre)
-    println("Edad + 2 = " + (edad + 2))
-    println("Promedio x 2 = " + (promedio * 2))
-    println("Estado: " + activo)
-
-    val numeros = listOf(1, 2, 3, 4)
-    for (num in numeros) {
-        println("Número: " + num)
+    for (nombre in listaNombres) {
+        mostrarMensaje(nombre)
     }
 
-    val resultado = duplicar(5)
-    println("Duplicado: " + resultado)
+    val numero = 1
 
-    mostrarMensaje("Hola desde función")
+    when (numero) {
+        1 {
+            println("Es uno")
+        }
+        2 {
+            println("Es dos")
+        }
+        else {
+            println("Otro número")
+        }
+    }
 }
