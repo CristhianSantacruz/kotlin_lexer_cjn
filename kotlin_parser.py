@@ -198,10 +198,15 @@ def inferir_tipo_expresion(expr, contexto):
 
         elif tipo_expr == "id":
             var_name = expr[1]
-            if var_name not in contexto["variables_definidas"]:
+            # Buscar en contexto local y global
+            if var_name not in contexto["variables_definidas"] and var_name not in context_semantico["variables_definidas"]:
                 add_error_semantico(f"La variable '{var_name}' se está usando antes de ser declarada.")
                 return "Unknown"
-            return contexto["tipos_variables"].get(var_name, "Unknown")
+            # Prioridad: local, luego global
+            if var_name in contexto["tipos_variables"]:
+                return contexto["tipos_variables"].get(var_name, "Unknown")
+            else:
+                return context_semantico["tipos_variables"].get(var_name, "Unknown")
 
         elif tipo_expr == "binop":
             op, izq, der = expr[1], expr[2], expr[3]
@@ -634,8 +639,38 @@ def verificar_nodo_semantica(nodo, contexto_local):
 # Se analizo tambien la semantica de la estructura de control if-else
 def verificar_semantica_completa(ast):
     """Verificar todas las reglas semánticas después de construir el AST"""
+    contexto_global = {
+        'en_funcion': False,
+        'en_bucle': False,
+        'nivel_bucle': 0,
+        'funciones_definidas': set(),
+        'variables_definidas': set(),
+        'tipos_variables': {},
+        'parametros_funcion_actual': [],
+        'tipo_retorno_funcion_actual': None,
+        'parametros_por_funcion': {}
+    }
     for nodo in ast:
-        verificar_nodo_semantica(nodo, contexto_local={'en_funcion': False, 'en_bucle': False})
+        if isinstance(nodo, tuple) and nodo[0] == "declare":
+            # Solo agrega variables globales cuando se declaran
+            varname = nodo[2]
+            tipo = None
+            if len(nodo) > 3:
+                tipo = nodo[3]
+            contexto_global['variables_definidas'].add(varname)
+            if tipo:
+                contexto_global['tipos_variables'][varname] = tipo
+        elif isinstance(nodo, tuple) and nodo[0] == "func_def":
+            # Verifica la función con el contexto actual (no incluye variables declaradas después)
+            nombre, params, tipo, cuerpo = nodo[1], nodo[2], nodo[3], nodo[4]
+            contexto_local = crear_contexto_funcion(params, tipo)
+            # Copia las variables globales actuales
+            contexto_local['variables_definidas'].update(contexto_global['variables_definidas'])
+            contexto_local['tipos_variables'].update(contexto_global['tipos_variables'])
+            for stmt in cuerpo:
+                verificar_nodo_semantica(stmt, contexto_local)
+        else:
+            verificar_nodo_semantica(nodo, contexto_global)
 
 
 # Comienza Noelia Saltos
@@ -865,4 +900,4 @@ def analizar_archivo_sintactico_semantico(nombre_archivo, usuario_git="usuarioGi
 #analizar_archivo_sintactico("algoritmo_sintactico3.kt", usuario_git="CristhianSantacruz")
 # analizar_archivo_sintactico_semantico("algoritmo_semantico3.kt", usuario_git="CristhianSantacruz")
 # analizar_archivo_sintactico_semantico("algoritmo_semantico1.kt", usuario_git="JDC1907")
-analizar_archivo_sintactico_semantico("algoritmo_prueba.kt", usuario_git="NoeSaltos")
+analizar_archivo_sintactico_semantico("algoritmos_prueba.kt", usuario_git="NoeSaltos")

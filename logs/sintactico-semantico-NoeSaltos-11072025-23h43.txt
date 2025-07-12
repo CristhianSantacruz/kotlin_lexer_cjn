@@ -1,0 +1,69 @@
+=== LOG DE ANALISIS SINTACTICO-SEMANTICO ===
+Usuario: NoeSaltos
+Fecha y hora: 11072025-23h43
+Archivo: algoritmos_prueba.kt
+
+Código fuente analizado:
+----------------------------------------
+fun mostrarMensaje(nombre: String) {
+    println("Bienvenido " + nombre)
+}
+
+fun main() {
+    val listaNombres = listOf("Ana", "Luis", "Pedro")
+
+    for (nombre in listaNombres) {
+        mostrarMensaje(nombre)
+    }
+
+    val numero = 1
+
+    when (numero) {
+        1 {
+            println("Es uno")
+        }
+        2 {
+            println("Es dos")
+        }
+        else {
+            println("Otro número")
+        }
+    }
+}
+----------------------------------------
+
+✅ Análisis sintáctico exitoso
+
+✅ Análisis semántico exitoso
+
+=== INFORMACIÓN SEMÁNTICA ===
+Funciones definidas: ['main', 'mostrarMensaje']
+Variables definidas: ['numero', 'listaNombres']
+Tipos de variables: {}
+
+=== ARBOL SINTACTICO ===
+[ ( 'func_def',
+    'mostrarMensaje',
+    [('nombre', 'String')],
+    'Unit',
+    [('print', ('binop', '+', ('literal', 'Bienvenido '), ('id', 'nombre')))]),
+  ( 'func_def',
+    'main',
+    [],
+    'Unit',
+    [ ( 'declare',
+        'val',
+        'listaNombres',
+        ( 'listOf',
+          [('literal', 'Ana'), ('literal', 'Luis'), ('literal', 'Pedro')])),
+      ( 'for',
+        'nombre',
+        ('id', 'listaNombres'),
+        [ ('expr_stmt', ('id', 'mostrarMensaje')),
+          ('expr_stmt', ('id', 'nombre'))]),
+      ('declare', 'val', 'numero', ('literal', 1)),
+      ( 'when_stmt',
+        ('id', 'numero'),
+        [ ('when_case', ('literal', 1), [('print', ('literal', 'Es uno'))]),
+          ('when_case', ('literal', 2), [('print', ('literal', 'Es dos'))]),
+          ('when_else', [('print', ('literal', 'Otro número'))])])])]
