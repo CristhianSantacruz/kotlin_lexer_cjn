@@ -154,6 +154,20 @@ class KotlinAnalyzerGUI:
             state=tk.DISABLED
         )
         self.ast_output.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+
+        # Pestaña de Semántica
+        semantic_frame = tk.Frame(self.notebook, bg="white")
+        self.notebook.add(semantic_frame, text="🔎 Semántica")
+
+        self.semantic_output = scrolledtext.ScrolledText(
+            semantic_frame,
+            wrap=tk.WORD,
+            font=("Consolas", 9),
+            bg="white",
+            fg="#333333",
+            state=tk.DISABLED
+        )
+        self.semantic_output.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
         
         # Pestaña de Ejecución
         execution_frame = tk.Frame(self.notebook, bg="white")
@@ -261,7 +275,7 @@ class KotlinAnalyzerGUI:
         
     def clear_outputs(self):
         """Limpiar todas las salidas"""
-        outputs = [self.tokens_output, self.errors_output, self.ast_output, self.execution_output]
+        outputs = [self.tokens_output, self.errors_output, self.ast_output, self.execution_output, self.semantic_output]
         for output in outputs:
             output.config(state=tk.NORMAL)
             output.delete(1.0, tk.END)
@@ -385,7 +399,30 @@ class KotlinAnalyzerGUI:
 
             # Mostrar resultado de ejecución (si no hay errores)
             self.execution_output.config(state=tk.NORMAL)
-            self.execution_output.insert(tk.END, "=== SALIDA DE EJECUCIÓN ===\n\n")
+            self.execution_output.insert(tk.END, "=== SALIDA DE EJECUCIÓN ===\n\n")          
+
+            # Mostrar resumen semántico en la pestaña Semántica
+            self.semantic_output.config(state=tk.NORMAL)
+            self.semantic_output.delete(1.0, tk.END)
+            if errors_semanticos:
+                self.semantic_output.insert(
+                    tk.END,
+                    "⚠ No se muestra el resumen semántico debido a errores.\n"
+                    "Revisa la pestaña de errores para más detalles."
+                )
+            else:
+                resumen = "=== INFORMACIÓN SEMÁNTICA ===\n"
+                resumen += f"Funciones definidas: {list(context_semantico['funciones_definidas'])}\n"
+                resumen += f"Variables definidas: {list(context_semantico['variables_definidas'])}\n"
+                resumen += f"Tipos de variables: {context_semantico['tipos_variables']}\n"
+                resumen += "\nParámetros de funciones:\n"
+                for func in context_semantico.get('funciones_definidas', []):
+                    params = context_semantico['parametros_por_funcion'].get(func, [])
+                    resumen += f"  {func}: {params}\n"
+                self.semantic_output.insert(tk.END, resumen)
+            self.semantic_output.config(state=tk.DISABLED)
+
+        # ... resto de tu función ...
             
             # Limpiar errores previos
             errores_sintacticos.clear()

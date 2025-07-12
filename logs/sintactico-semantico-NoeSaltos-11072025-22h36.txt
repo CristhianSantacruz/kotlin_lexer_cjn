@@ -1,0 +1,96 @@
+=== LOG DE ANALISIS SINTACTICO-SEMANTICO ===
+Usuario: NoeSaltos
+Fecha y hora: 11072025-22h36
+Archivo: algoritmo.kt
+
+Código fuente analizado:
+----------------------------------------
+// Función con retorno correcto
+fun duplicar(x: Int): Int {
+    return x * 2
+}
+
+// Función sin retorno (Unit)
+fun mostrarMensaje(msg: String) {
+    println("Mensaje: " + msg)
+}
+
+fun main() {
+    var nombre = "Kotlin"
+    val edad = 10
+    val activo = true
+    val promedio = 8.75
+
+    println("Bienvenido " + nombre)
+    println("Edad + 2 = " + (edad + 2))
+    println("Promedio x 2 = " + (promedio * 2))
+    println("Estado: " + activo)
+
+    val numeros = listOf(1, 2, 3, 4)
+    for (num in numeros) {
+        println("Número: " + num)
+    }
+
+    val resultado = duplicar(5)
+    println("Duplicado: " + resultado)
+
+    mostrarMensaje("Hola desde función")
+}
+
+----------------------------------------
+
+✅ Análisis sintáctico exitoso
+
+✅ Análisis semántico exitoso
+
+=== INFORMACIÓN SEMÁNTICA ===
+Funciones definidas: ['duplicar', 'main', 'mostrarMensaje']
+Variables definidas: ['activo', 'resultado', 'promedio', 'nombre', 'edad', 'numeros']
+Tipos de variables: {}
+
+=== ARBOL SINTACTICO ===
+[ ( 'func_def',
+    'duplicar',
+    [('x', 'Int')],
+    'Int',
+    [('return', ('binop', '*', ('id', 'x'), ('literal', 2)))]),
+  ( 'func_def',
+    'mostrarMensaje',
+    [('msg', 'String')],
+    'Unit',
+    [('print', ('binop', '+', ('literal', 'Mensaje: '), ('id', 'msg')))]),
+  ( 'func_def',
+    'main',
+    [],
+    'Unit',
+    [ ('declare', 'var', 'nombre', ('literal', 'Kotlin')),
+      ('declare', 'val', 'edad', ('literal', 10)),
+      ('declare', 'val', 'activo', ('literal', 'true')),
+      ('declare', 'val', 'promedio', ('literal', 8.75)),
+      ('print', ('binop', '+', ('literal', 'Bienvenido '), ('id', 'nombre'))),
+      ( 'print',
+        ( 'binop',
+          '+',
+          ('literal', 'Edad + 2 = '),
+          ('binop', '+', ('id', 'edad'), ('literal', 2)))),
+      ( 'print',
+        ( 'binop',
+          '+',
+          ('literal', 'Promedio x 2 = '),
+          ('binop', '*', ('id', 'promedio'), ('literal', 2)))),
+      ('print', ('binop', '+', ('literal', 'Estado: '), ('id', 'activo'))),
+      ( 'declare',
+        'val',
+        'numeros',
+        ( 'listOf',
+          [('literal', 1), ('literal', 2), ('literal', 3), ('literal', 4)])),
+      ( 'for',
+        'num',
+        ('id', 'numeros'),
+        [('print', ('binop', '+', ('literal', 'Número: '), ('id', 'num')))]),
+      ('declare', 'val', 'resultado', ('id', 'duplicar')),
+      ('expr_stmt', ('literal', 5)),
+      ( 'print',
+        ('binop', '+', ('literal', 'Duplicado: '), ('id', 'resultado'))),
+      ('expr_stmt', ('id', 'mostrarMensaje')),
+      ('expr_stmt', ('literal', 'Hola desde función'))])]

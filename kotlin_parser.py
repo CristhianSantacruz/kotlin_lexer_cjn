@@ -25,7 +25,8 @@ context_semantico = {
     'variables_definidas': set(),
     'tipos_variables': {},
     'parametros_funcion_actual': [],
-    'tipo_retorno_funcion_actual': None
+    'tipo_retorno_funcion_actual': None,
+    'parametros_por_funcion': {}
 }
 
 errors_semanticos = []
@@ -42,7 +43,8 @@ def reset_context_semantico():
         'variables_definidas': set(),
         'tipos_variables': {},
         'parametros_funcion_actual': [],
-        'tipo_retorno_funcion_actual': None
+        'tipo_retorno_funcion_actual': None,
+        'parametros_por_funcion': {}
     }
     errors_semanticos = []
     return
@@ -114,6 +116,9 @@ def p_declaration(p):
     #------Noelia Saltos, prueba de la regla semantica---------
     context_semantico['variables_definidas'].add(p[2])
     #------Noelia Saltos, Fin prueba de la regla semantica---------
+    if len(p) == 6 or len(p) == 7:
+        tipo = p[4]
+        context_semantico['tipos_variables'][p[2]] = tipo
     p[0] = ("declare", p[1], p[2], p[4])
 
 
@@ -494,6 +499,7 @@ def p_function_def(p):
         cuerpo = p[6]
 
     context_semantico['funciones_definidas'].add(nombre)
+    context_semantico['parametros_por_funcion'][nombre] = params
     contexto_local = crear_contexto_funcion(params, tipo)
 
     # Verificar el cuerpo de la función usando el contexto local
@@ -629,11 +635,9 @@ def p_expression_arrayof(p):
     """expression : ARRAYOF LPAREN expression_list RPAREN"""
     p[0] = ("arrayOf", p[3])
 
-def p_if_else(p,contexto_local):
+def p_if_else(p):
     '''if_else : IF LPAREN expression RPAREN block ELSE block'''
-    expr_tipo = inferir_tipo_expresion(p[3],contexto_local)
-    if expr_tipo != "Unknown" and expr_tipo != "Boolean":
-        add_error_semantico(f"La condición del if debe ser de tipo Boolean, se encontró '{expr_tipo}'", getattr(p, 'lineno', None))
+    # Solo construye el AST aquí
     p[0] = ("if_else", p[3], p[5], p[7])
 
 # def p_function_def_no_params_no_return(p):
