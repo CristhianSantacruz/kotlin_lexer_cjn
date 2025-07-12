@@ -14,7 +14,7 @@ Este proyecto implementa un **analizador completo (léxico, sintáctico y semán
 ---
 
 ## 📦 Estructura del 
-├── kotlin_lexer.py # Analizador léxico (tokens y expresiones regulares) /n
+├── kotlin_lexer.py # Analizador léxico (tokens y expresiones regulares)
 ├── kotlin_parser.py # Parser sintáctico y semántico
 ├── kotlin_gui.py # Interfaz gráfica (GUI)
 ├── algoritmo.kt # Archivo de prueba de código Kotlin
@@ -29,5 +29,14 @@ Este proyecto implementa un **analizador completo (léxico, sintáctico y semán
 
 Instalación de PLY:
 
-```bash
 pip install ply
+
+## Ejecuta la interfaz gráfica:
+
+python kotlin_gui.py
+
+## Carga el archivo .kt con tu algoritmo (ej. algoritmo.kt), presiona el botón "Analizar" y verás los resultados organizados en pestañas:
+-Tokens léxicos
+-Errores sintácticos
+-Errores semánticos
+-AST y salida de ejecución
