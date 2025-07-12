@@ -29,6 +29,7 @@ context_semantico = {
 }
 
 errors_semanticos = []
+errores_sintacticos = []
 
 
 def reset_context_semantico():
@@ -84,9 +85,6 @@ def p_statement_list_empty(p):
 def p_statement(p):
     '''statement : declaration
                  | function_def
-                 | function_def_params_no_return
-                 | function_def_no_params_no_return
-                 | function_def_no_params_with_return
                  | class_def
                  | for_loop
                  | when_stmt
@@ -109,23 +107,17 @@ def p_statement(p):
 # Declaración de variables (val/var)
 def p_declaration(p):
     '''declaration : VAR ID ASSIGN expression
-                   | VAL ID ASSIGN expression'''
-    p[0] = ("declare", p[1], p[2], p[4])
+                   | VAL ID ASSIGN expression
+                    | VAR ID COLON type ASSIGN expression
+                    | VAL ID COLON type ASSIGN expression'''
+   
     #------Noelia Saltos, prueba de la regla semantica---------
     context_semantico['variables_definidas'].add(p[2])
     #------Noelia Saltos, Fin prueba de la regla semantica---------
+    p[0] = ("declare", p[1], p[2], p[4])
 
-# Función con valor de retorno
-def p_function_def(p):
-    """function_def : FUN ID LPAREN param_list_opt RPAREN COLON type block"""
-    #------Jahir Díaz, prueba de la regla semantica---------
-    context_semantico['tipo_retorno_funcion_actual'] = p[7]
-    context_semantico['en_funcion'] = True
-    context_semantico['funciones_definidas'].add(p[2])
-    verificar_tipo_retorno_funcion(p)  # <- Validación semántica
-    context_semantico['en_funcion'] = False
-    #------Jahir Díaz, prueba de la regla semantica---------
-    p[0] = ("func_def", p[2], p[4], p[7], p[8])
+
+
 
 def p_param_list_opt(p):
     '''param_list_opt : param_list
@@ -181,7 +173,74 @@ def p_map_entry(p):
     """map_entry : expression TO expression"""
     p[0] = (p[1], p[3])
 
+#Inicio Semantico Jahir Díaz Cedeño
+# Verificación semántica de tipos
+
+def inferir_tipo_expresion(expr, contexto):
+    if isinstance(expr, tuple):
+        tipo_expr = expr[0]
+
+        if tipo_expr == "literal":
+            value = expr[1]
+            if isinstance(value, bool):
+                return "Boolean"
+            elif isinstance(value, int):
+                return "Int"
+            elif isinstance(value, float):
+                return "Double"
+            elif isinstance(value, str):
+                return "String"
+
+        elif tipo_expr == "id":
+            var_name = expr[1]
+            if var_name not in contexto["variables_definidas"]:
+                add_error_semantico(f"La variable '{var_name}' se está usando antes de ser declarada.")
+                return "Unknown"
+            return contexto["tipos_variables"].get(var_name, "Unknown")
+
+        elif tipo_expr == "binop":
+            op, izq, der = expr[1], expr[2], expr[3]
+            tipo_izq = inferir_tipo_expresion(izq, contexto)
+            tipo_der = inferir_tipo_expresion(der, contexto)
+            if op in ['+', '-', '*', '/']:
+                if tipo_izq in ["Int", "Double"] and tipo_der in ["Int", "Double"]:
+                    return "Double" if "Double" in (tipo_izq, tipo_der) else "Int"
+                if op == "+" and tipo_izq == "String" and tipo_der == "String":
+                    return "String"
+                add_error_semantico(f"Operación '{op}' incompatible entre '{tipo_izq}' y '{tipo_der}'")
+                return "Unknown"
+            else:
+                return "Boolean"
+    return "Unknown"
+
+
+#Fin Semantico Jahir Díaz Cedeño
+
 # Expresiones
+#Noelia Saltos Hernandez
+# 1era Regla .- Se valida que las operaciones entre variables o literales se realicen entre tipos compatibles.
+# 2da Regla .- Y se verifica que las comparaciones lógicas se hagan entre tipos compatibles.
+
+def verificar_operacion_binaria_compatible(expr, contexto_local):
+    if expr[0] == "binop":
+        _, op, izq, der = expr
+        tipo_izq = inferir_tipo_expresion(izq,contexto_local)
+        tipo_der = inferir_tipo_expresion(der, contexto_local)
+
+        if op == '+':
+            # Permitir Int + Int, Double + Double, Int + Double, String + String
+            if (tipo_izq in ["Int", "Double"] and tipo_der in ["Int", "Double"]) or (tipo_izq == "String" and tipo_der == "String"):
+                return
+            else:
+                add_error_semantico(f"Operación '+' incompatible entre '{tipo_izq}' y '{tipo_der}'")
+
+        elif op in ['-', '*', '/']:
+            if tipo_izq not in ["Int", "Double"] or tipo_der not in ["Int", "Double"]:
+                add_error_semantico(f"Operación '{op}' incompatible entre '{tipo_izq}' y '{tipo_der}'")
+
+        elif op in ['>', '<', '>=', '<=', '==', '!=']:
+            if tipo_izq != tipo_der:
+                add_error_semantico(f"Comparación entre tipos incompatibles: '{tipo_izq}' y '{tipo_der}'")
 
 def p_expression_binary(p):
     '''expression : expression PLUS expression
@@ -198,7 +257,7 @@ def p_expression_binary(p):
                   | expression OR expression'''
     p[0] = ("binop", p[2], p[1], p[3])
     # -- Noelia Saltos, prueba de la regla semantica---------
-    verificar_operacion_binaria_compatible(p[0])
+    # verificar_operacion_binaria_compatible(p[0],contexto_local)
     # -- Noelia Saltos, Fin prueba de la regla semantica---------
 
 
@@ -218,12 +277,24 @@ def p_expression_literal(p):
                   | BOOLEAN_FALSE'''
     p[0] = ("literal", p[1])
 
+#Noelia Saltos Hernandez
+# 3era Regla .- Se verifica las variables no deben ser usadas antes de ser declaradas
+def verificar_variables_declaradas(expr,contexto_local):
+    if isinstance(expr, tuple):
+        if expr[0] == 'var':
+            varname = expr[1]
+            contexto_local['variables_definidas'].add(varname)
+        elif expr[0] == 'use_var':
+            varname = expr[1]
+            if varname not in contexto_local['variables_definidas']:
+                add_error_semantico(f"La variable '{varname}' se está usando antes de ser declarada.")
+
 def p_expression_id(p):
     """expression : ID"""
     p[0] = ("id", p[1])
     # -- Noelia Saltos, prueba de la regla semantica---------
-    verificar_variables_declaradas(('use_var', p[1]))
-    # ------------Fin Noelia Saltos
+    # verificar_variables_declaradas(('use_var', p[1]),contexto_local)
+    # # ------------Fin Noelia Saltos
 
 # Impresión
 def p_print_stmt(p):
@@ -299,13 +370,52 @@ def p_when_stmt_without_expr(p):
     """when_stmt : WHEN LBRACE when_branches RBRACE"""
     p[0] = ("when_stmt_no_expr", p[3])
 
-# Función sin retorno
-def p_function_def_params_no_return(p):
-    """function_def_params_no_return : FUN ID LPAREN param_list RPAREN block"""
-    p[0] = ("func_def_params_no_return", p[2], p[4], p[6])
+# # Función sin retorno
+# def p_function_def_params_no_return(p):
+#     """function_def_params_no_return : FUN ID LPAREN param_list RPAREN block"""
+#     p[0] = ("func_def_params_no_return", p[2], p[4], p[6])
+
+
+def verificar_asignacion_tipada(p,contexto_local):
+    if len(p) == 7:
+        tipo = p[4]  # tipo explícito
+        expr = p[6]
+        tipo_expr = inferir_tipo_expresion(expr,contexto_local)
+        if tipo_expr != "Unknown" and tipo_expr != tipo:
+            add_error_semantico(f"Tipo incompatible en la asignación. Esperado '{tipo}', pero se encontró '{tipo_expr}'", getattr(p, 'lineno', None))
+
+        # Validación específica para Boolean (true/false solamente)
+        if tipo == "Boolean" and tipo_expr != "Boolean":
+            add_error_semantico(f"Tipo inválido para Boolean. Solo se permite true o false, se encontró '{tipo_expr}'", getattr(p, 'lineno', None))
+
+#Se implementaron dos reglas semánticas para la validación de tipos en asignaciones.
+#La primera regla verifica que el tipo declarado de una variable coincida con el tipo inferido de la expresión asignada, generando un error semántico si son incompatibles.
+#La segunda regla añade una validación específica para variables del tipo Boolean, asegurando que únicamente acepten los valores true o false como asignación válida.
+
+#Inicio Semantico Jahir Díaz Cedeño
+def verificar_tipo_retorno_funcion(valor,contexto_local):
+    tipo_esperado = contexto_local['tipo_retorno_funcion_actual']
+    tipo_real = inferir_tipo_expresion(valor,contexto_local)
+
+    # DEBUG:
+    print("TIPO REAL INFERIDO:", tipo_real)
+    print("VARIABLES DEFINIDAS:", context_semantico['variables_definidas'])
+
+    if tipo_real != tipo_esperado:
+        add_error_semantico(
+            f"Tipo de retorno incorrecto. Se esperaba '{tipo_esperado}' pero se obtuvo '{tipo_real}'"
+        )
+
+def validar_funcion_unit_sin_return(body,contexto_local):
+    for sentencia in body:
+        if isinstance(sentencia, tuple) and sentencia[0] == "return":
+            add_error_semantico("Una función sin tipo de retorno no debe contener una instrucción return con valor.")
+# La primera regla valida que el tipo de valor retornado en una función coincida con el tipo de retorno declarado.
+# La segunda regla verifica que las funciones declaradas sin tipo de retorno (Unit) no contengan instrucciones return con valores, ya que esto violaría su definición.
 
 
 
+#Fin Semantico Jahir Díaz Cedeño
 
 
 # Definician de clases , propiedades y metodos
@@ -352,97 +462,51 @@ def p_method_def(p):
 
 #TERCER AVANCE, CON FECHA DE ENTREGA DEL 29/06/2025
 
-#Inicio Semantico Jahir Díaz Cedeño
-# Verificación semántica de tipos
-
-def inferir_tipo_expresion(expr):
-    if isinstance(expr, tuple) and len(expr) > 1:
-        if expr[0] == "literal":
-            value = expr[1]
-            if isinstance(value, bool):
-                return "Boolean"
-            elif isinstance(value, int):
-                return "Int"
-            elif isinstance(value, float):
-                return "Double"
-            elif isinstance(value, str):
-                return "String"
-    return "Unknown"
-
-def verificar_asignacion_tipada(p):
-    if len(p) == 7:
-        tipo = p[4]  # tipo explícito
-        expr = p[6]
-        tipo_expr = inferir_tipo_expresion(expr)
-        if tipo_expr != "Unknown" and tipo_expr != tipo:
-            add_error_semantico(f"Tipo incompatible en la asignación. Esperado '{tipo}', pero se encontró '{tipo_expr}'", getattr(p, 'lineno', None))
-
-        # Validación específica para Boolean (true/false solamente)
-        if tipo == "Boolean" and tipo_expr != "Boolean":
-            add_error_semantico(f"Tipo inválido para Boolean. Solo se permite true o false, se encontró '{tipo_expr}'", getattr(p, 'lineno', None))
-
-#Se implementaron dos reglas semánticas para la validación de tipos en asignaciones.
-#La primera regla verifica que el tipo declarado de una variable coincida con el tipo inferido de la expresión asignada, generando un error semántico si son incompatibles.
-#La segunda regla añade una validación específica para variables del tipo Boolean, asegurando que únicamente acepten los valores true o false como asignación válida.
-
-#Inicio Semantico Jahir Díaz Cedeño
-def verificar_tipo_retorno_funcion(p):
-    tipo_esperado = context_semantico['tipo_retorno_funcion_actual']
-    if tipo_esperado is not None:
-        valor = p[2]
-        tipo_real = inferir_tipo_expresion(valor)
-        if tipo_real != tipo_esperado:
-            add_error_semantico(f"Tipo de retorno incorrecto. Se esperaba '{tipo_esperado}' pero se obtuvo '{tipo_real}'", getattr(p, 'lineno', None))
-
-def validar_funcion_unit_sin_return(body):
-    for sentencia in body:
-        if isinstance(sentencia, tuple) and sentencia[0] == "return":
-            add_error_semantico("Una función sin tipo de retorno no debe contener una instrucción return con valor.")
-# La primera regla valida que el tipo de valor retornado en una función coincida con el tipo de retorno declarado.
-# La segunda regla verifica que las funciones declaradas sin tipo de retorno (Unit) no contengan instrucciones return con valores, ya que esto violaría su definición.
-
-
-
-#Fin Semantico Jahir Díaz Cedeño
-
-#Fin Semantico Jahir Díaz Cedeño
+def crear_contexto_funcion(params, tipo_retorno):
+    contexto_local = {
+        'en_funcion': True,
+        'en_bucle': False,
+        'nivel_bucle': 0,
+        'funciones_definidas': set(),
+        'variables_definidas': set(),
+        'tipos_variables': {},
+        'parametros_funcion_actual': [],
+        'tipo_retorno_funcion_actual': tipo_retorno
+    }
+    for nombre_param, tipo_param in params:
+        contexto_local['variables_definidas'].add(nombre_param)
+        contexto_local['tipos_variables'][nombre_param] = tipo_param
+    return contexto_local
 
 #Inicio Semantico Noelia Saltos Hernandez
 
-# 1era Regla .- Se valida que las operaciones entre variables o literales se realicen entre tipos compatibles.
-# 2da Regla .- Y se verifica que las comparaciones lógicas se hagan entre tipos compatibles.
+# Función con valor de retorno
+def p_function_def(p):
+    """function_def : FUN ID LPAREN param_list_opt RPAREN COLON type block
+                    | FUN ID LPAREN param_list_opt RPAREN block"""
+    nombre = p[2]
+    params = p[4]
+    if len(p) == 9:  # con tipo de retorno
+        tipo = p[7]
+        cuerpo = p[8]
+    else:  # sin tipo de retorno
+        tipo = "Unit"
+        cuerpo = p[6]
 
-def verificar_operacion_binaria_compatible(expr):
-    if expr[0] == "binop":
-        _, op, izq, der = expr
-        tipo_izq = inferir_tipo_expresion(izq)
-        tipo_der = inferir_tipo_expresion(der)
+    context_semantico['funciones_definidas'].add(nombre)
+    contexto_local = crear_contexto_funcion(params, tipo)
 
-        if op == '+':
-            # Permitir Int + Int, Double + Double, Int + Double, String + String
-            if (tipo_izq in ["Int", "Double"] and tipo_der in ["Int", "Double"]) or (tipo_izq == "String" and tipo_der == "String"):
-                return
-            else:
-                add_error_semantico(f"Operación '+' incompatible entre '{tipo_izq}' y '{tipo_der}'")
+    # Verificar el cuerpo de la función usando el contexto local
+    if tipo != "Unit":
+        for stmt in cuerpo:
+            verificar_tipo_retorno_funcion(stmt[1], contexto_local)
+    else:
+        validar_funcion_unit_sin_return(cuerpo, contexto_local)
 
-        elif op in ['-', '*', '/']:
-            if tipo_izq not in ["Int", "Double"] or tipo_der not in ["Int", "Double"]:
-                add_error_semantico(f"Operación '{op}' incompatible entre '{tipo_izq}' y '{tipo_der}'")
+    p[0] = ("func_def", nombre, params, tipo, cuerpo)
 
-        elif op in ['>', '<', '>=', '<=', '==', '!=']:
-            if tipo_izq != tipo_der:
-                add_error_semantico(f"Comparación entre tipos incompatibles: '{tipo_izq}' y '{tipo_der}'")
 
-# 3era Regla .- Se verifica las variables no deben ser usadas antes de ser declaradas
-def verificar_variables_declaradas(expr):
-    if isinstance(expr, tuple):
-        if expr[0] == 'var':
-            varname = expr[1]
-            context_semantico['variables_definidas'].add(varname)
-        elif expr[0] == 'use_var':
-            varname = expr[1]
-            if varname not in context_semantico['variables_definidas']:
-                add_error_semantico(f"La variable '{varname}' se está usando antes de ser declarada.")
+
 
  
 
@@ -461,42 +525,36 @@ def p_continue_stmt(p):
     
     p[0] = ("continue",)
 
-def p_function_def_no_params_with_return(p):
-    """function_def_no_params_with_return : FUN ID LPAREN RPAREN COLON type block"""
-    # Establecer contexto antes de procesar
-    context_semantico['en_funcion'] = True
-    context_semantico['funciones_definidas'].add(p[2])
-    context_semantico['tipo_retorno_funcion_actual'] = p[6]
+# def p_function_def_no_params_with_return(p):
+#     """function_def_no_params_with_return : FUN ID LPAREN RPAREN COLON type block"""
+#     # Establecer contexto antes de procesar
+#     context_semantico['en_funcion'] = True
+#     context_semantico['funciones_definidas'].add(p[2])
+#     context_semantico['tipo_retorno_funcion_actual'] = p[6]
     
-    # El bloque ya fue procesado por el parser con el contexto activo
-    # Ahora restablecer el contexto después del procesamiento
-    context_semantico['en_funcion'] = False
-    context_semantico['tipo_retorno_funcion_actual'] = None
-    p[0] = ("func_def_no_params_with_return", p[2], [], p[6], p[7])
+#     # El bloque ya fue procesado por el parser con el contexto activo
+#     # Ahora restablecer el contexto después del procesamiento
+#     context_semantico['en_funcion'] = False
+#     context_semantico['tipo_retorno_funcion_actual'] = None
+#     p[0] = ("func_def_no_params_with_return", p[2], [], p[6], p[7])
 
 
-def inferir_tipo_expresion(expr):
-    """Función auxiliar para inferir tipos básicos de expresiones"""
-    if isinstance(expr, tuple) and len(expr) > 1:
-        if expr[0] == "literal":
-            value = expr[1]
-            if isinstance(value, bool):
-                return "Boolean"
-            elif isinstance(value, int):
-                return "Int"
-            elif isinstance(value, float):
-                return "Double"
-            elif isinstance(value, str):
-                return "String"
-    return "Unknown"
+# def inferir_tipo_expresion(expr):
+#     """Función auxiliar para inferir tipos básicos de expresiones"""
+#     if isinstance(expr, tuple) and len(expr) > 1:
+#         if expr[0] == "literal":
+#             value = expr[1]
+#             if isinstance(value, bool):
+#                 return "Boolean"
+#             elif isinstance(value, int):
+#                 return "Int"
+#             elif isinstance(value, float):
+#                 return "Double"
+#             elif isinstance(value, str):
+#                 return "String"
+#     return "Unknown"
 
 #Se agrego la función inferir_tipo_expresion para poder inferir el tipo de una expresión
-
-# Se analizo tambien la semantica de la estructura de control if-else
-def verificar_semantica_completa(ast):
-    """Verificar todas las reglas semánticas después de construir el AST"""
-    for nodo in ast:
-        verificar_nodo_semantica(nodo, contexto_local={'en_funcion': False, 'en_bucle': False})
 
 def verificar_nodo_semantica(nodo, contexto_local):
     """Verificar semántica de un nodo recursivamente"""
@@ -559,6 +617,11 @@ def verificar_nodo_semantica(nodo, contexto_local):
 
 #Fin Semantico Cristhian Santacruz
 
+# Se analizo tambien la semantica de la estructura de control if-else
+def verificar_semantica_completa(ast):
+    """Verificar todas las reglas semánticas después de construir el AST"""
+    for nodo in ast:
+        verificar_nodo_semantica(nodo, contexto_local={'en_funcion': False, 'en_bucle': False})
 
 
 # Comienza Noelia Saltos
@@ -566,19 +629,19 @@ def p_expression_arrayof(p):
     """expression : ARRAYOF LPAREN expression_list RPAREN"""
     p[0] = ("arrayOf", p[3])
 
-def p_if_else(p):
+def p_if_else(p,contexto_local):
     '''if_else : IF LPAREN expression RPAREN block ELSE block'''
-    expr_tipo = inferir_tipo_expresion(p[3])
+    expr_tipo = inferir_tipo_expresion(p[3],contexto_local)
     if expr_tipo != "Unknown" and expr_tipo != "Boolean":
         add_error_semantico(f"La condición del if debe ser de tipo Boolean, se encontró '{expr_tipo}'", getattr(p, 'lineno', None))
     p[0] = ("if_else", p[3], p[5], p[7])
 
-def p_function_def_no_params_no_return(p):
-    """function_def_no_params_no_return : FUN ID LPAREN RPAREN block"""
-    #------Jahir Díaz, prueba de la regla semantica---------
-    validar_funcion_unit_sin_return(p[5])
-    #------Jahir Díaz, prueba de la regla semantica---------
-    p[0] = ("func_def_no_params_no_return", p[2], [], p[5])
+# def p_function_def_no_params_no_return(p):
+#     """function_def_no_params_no_return : FUN ID LPAREN RPAREN block"""
+#     #------Jahir Díaz, prueba de la regla semantica---------
+#     validar_funcion_unit_sin_return(p[5])
+#     #------Jahir Díaz, prueba de la regla semantica---------
+#     p[0] = ("func_def_no_params_no_return", p[2], [], p[5])
 
 def p_expression_readline(p):
     '''expression : READLINE LPAREN RPAREN'''
@@ -602,12 +665,6 @@ parser = yacc.yacc()
 
 #INTERPRETE
 contexto = {}
-
-def ejecutar_programa(arbol):
-    contexto = {}
-    for nodo in arbol:
-        ejecutar_nodo(nodo, contexto)
-
 def ejecutar_nodo(nodo, contexto):
     tipo = nodo[0]
 
@@ -627,6 +684,11 @@ def ejecutar_nodo(nodo, contexto):
     elif tipo == "func_def_no_params_no_return":
         # No ejecutamos funciones aún, pero podrías almacenarlas en contexto si lo deseas
         print(f"Función '{nodo[1]}' definida pero no ejecutada automáticamente.")
+
+def ejecutar_programa(arbol):
+    contexto = {}
+    for nodo in arbol:
+        ejecutar_nodo(nodo, contexto)
 
 
 def evaluar_expresion(expr, contexto):
@@ -789,6 +851,6 @@ def analizar_archivo_sintactico_semantico(nombre_archivo, usuario_git="usuarioGi
 #analizar_archivo_sintactico("algoritmo_sintactico1.kt", usuario_git="JDC1907")
 #analizar_archivo_sintactico("algoritmo_sintactico2.kt", usuario_git="NoeSaltos")
 #analizar_archivo_sintactico("algoritmo_sintactico3.kt", usuario_git="CristhianSantacruz")
-analizar_archivo_sintactico_semantico("algoritmo_semantico3.kt", usuario_git="CristhianSantacruz")
-analizar_archivo_sintactico_semantico("algoritmo_semantico1.kt", usuario_git="JDC1907")
-analizar_archivo_sintactico_semantico("algoritmo_semantico2.kt", usuario_git="NoeSaltos")
+# analizar_archivo_sintactico_semantico("algoritmo_semantico3.kt", usuario_git="CristhianSantacruz")
+# analizar_archivo_sintactico_semantico("algoritmo_semantico1.kt", usuario_git="JDC1907")
+analizar_archivo_sintactico_semantico("algoritmo.kt", usuario_git="NoeSaltos")

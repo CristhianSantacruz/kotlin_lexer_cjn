@@ -1,0 +1,55 @@
+=== LOG DE ANALISIS SINTACTICO-SEMANTICO ===
+Usuario: JDC1907
+Fecha y hora: 11072025-17h50
+Archivo: algoritmo_semantico1.kt
+
+Código fuente analizado:
+----------------------------------------
+// PRUEBA DE TIPOS DE DATOS
+// =============================
+// Correcto
+val edad: Int = 20    
+// Incorrecto: tipo incompatible                 
+val edadTexto: Int = "veintecinco"     
+
+// Correcto
+val activo: Boolean = true     
+// Incorrecto: tipo no válido (String)         
+val activoTexto: Boolean = "true"      
+
+// PRUEBA DE RETORNO DE FUNCIONES
+// =============================
+// Correcto
+fun obtenerNombre(): String {
+    return "Carlos"                    
+}
+
+// Incorrecto: se esperaba un Int
+fun obtenerEdad(): Int {
+    return "veinticinco"              
+}
+
+// Correcto: sin retorno explícito
+fun saludar() {                        
+    println("Hola")
+}
+
+// Incorrecto: función sin retorno no debe devolver valor
+fun despedir(): Unit {
+    return "Adiós"                    
+}
+----------------------------------------
+
+❌ ERRORES DE SINTAXIS:
+  Error de sintaxis en token 'COLON' (valor: :) en la línea 19
+  Error de sintaxis en token 'COLON' (valor: :) en la línea 21
+  Error de sintaxis en token 'COLON' (valor: :) en la línea 24
+  Error de sintaxis en token 'COLON' (valor: :) en la línea 26
+
+✅ Análisis semántico exitoso
+
+=== INFORMACIÓN SEMÁNTICA ===
+Funciones definidas: ['obtenerNombre', 'despedir', 'obtenerEdad']
+Variables definidas: []
+Tipos de variables: {}
+

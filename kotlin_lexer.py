@@ -376,11 +376,11 @@ if __name__ == "__main__":
     
     # Jahir Díaz Cedeño
     # Analizar archivo externo .kt
-    analizar_archivo("algoritmo3.kt", usuario_git="JDC1907")
+    # analizar_archivo("algoritmo3.kt", usuario_git="JDC1907")
 
-    # Cristhian Santacruz Gorozabel
-    # Analizar archivo externo .kt
-    analizar_archivo("algoritmo1.kt", usuario_git="CristhianSantacruz")
+    # # Cristhian Santacruz Gorozabel
+    # # Analizar archivo externo .kt
+    # analizar_archivo("algoritmo1.kt", usuario_git="CristhianSantacruz")
     
 
     
