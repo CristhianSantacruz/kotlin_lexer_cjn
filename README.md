@@ -7,7 +7,7 @@ Este proyecto implementa un **analizador completo (léxico, sintáctico y semán
 ## 🧑‍💻 Autores
 
 - Cristhian Santacruz Gorozabel
--   Noelia Saltos Hernández  
+- Noelia Saltos Hernández  
 - Jahir Díaz Cedeño  
 
 
