@@ -14,7 +14,7 @@ Este proyecto implementa un **analizador completo (léxico, sintáctico y semán
 ---
 
 ## 📦 Estructura del 
-├── kotlin_lexer.py # Analizador léxico (tokens y expresiones regulares)
+├── kotlin_lexer.py # Analizador léxico (tokens y expresiones regulares) /n
 ├── kotlin_parser.py # Parser sintáctico y semántico
 ├── kotlin_gui.py # Interfaz gráfica (GUI)
 ├── algoritmo.kt # Archivo de prueba de código Kotlin
