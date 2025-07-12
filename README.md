@@ -13,16 +13,13 @@ Este proyecto implementa un **analizador completo (léxico, sintáctico y semán
 
 ---
 
-# 📦 Estructura del 
+## 📦 Estructura del 
 ├── kotlin_lexer.py # Analizador léxico (tokens y expresiones regulares)
 ├── kotlin_parser.py # Parser sintáctico y semántico
 ├── kotlin_gui.py # Interfaz gráfica (GUI)
 ├── algoritmo.kt # Archivo de prueba de código Kotlin
 ├── logs/
-│ ├── lexico-usuario-fecha.txt
-│ ├── sintactico-usuario-fecha.txt
-│ ├── semantico-usuario-fecha.txt
-│ └── salida-usuario-fecha.txt
+
 ---
 
 ## 🛠️ Requisitos
