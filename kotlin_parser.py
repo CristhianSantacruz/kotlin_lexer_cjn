@@ -101,6 +101,9 @@ def p_statement(p):
 
 
 
+def p_expression_null(p):
+    'expression : NULL'
+    p[0] = ('null',)
 
 
 # Comienza Jahir Díaz Cedeño
@@ -110,8 +113,8 @@ def p_statement(p):
 def p_declaration(p):
     '''declaration : VAR ID ASSIGN expression
                    | VAL ID ASSIGN expression
-                    | VAR ID COLON type ASSIGN expression
-                    | VAL ID COLON type ASSIGN expression'''
+                   | VAR ID COLON type ASSIGN expression
+                   | VAL ID COLON type ASSIGN expression'''
    
     #------Noelia Saltos, prueba de la regla semantica---------
     context_semantico['variables_definidas'].add(p[2])
@@ -145,8 +148,17 @@ def p_type(p):
             | TYPE_DOUBLE
             | TYPE_BOOLEAN
             | TYPE_STRING
-            | ID"""
-    p[0] = p[1]
+            | ID
+            | ID LESS ID GREATER
+            | ID LESS ID COMMA ID GREATER"""
+    if len(p) == 2:
+        p[0] = p[1]
+    elif len(p) == 5:
+        # Ej: List<String>
+        p[0] = f"{p[1]}<{p[3]}>"
+    elif len(p) == 7:
+        # Ej: Map<String, Int>
+        p[0] = f"{p[1]}<{p[3]}, {p[5]}>"
 
 # Return
 def p_return_stmt(p):
@@ -156,6 +168,7 @@ def p_return_stmt(p):
 # Estructura de control: bucle for
 def p_for_loop(p):
     """for_loop : FOR LPAREN ID IN expression RPAREN loop_body"""
+    context_semantico['variables_definidas'].add(p[3]) 
     p[0] = ("for", p[3], p[5], p[7])
 
 def p_loop_body(p):
@@ -224,7 +237,7 @@ def inferir_tipo_expresion(expr, contexto):
             var_name = expr[1]
             # Buscar en contexto local y global
             if var_name not in contexto["variables_definidas"] and var_name not in context_semantico["variables_definidas"]:
-                print(f"Detectado uso de variable no declarada: {var_name}")
+                # print(f"Detectado uso de variable no declarada: {var_name}")
                 add_error_semantico(f"La variable '{var_name}' se está usando antes de ser declarada.")
                 return "Unknown"
             # Prioridad: local, luego global
@@ -354,6 +367,9 @@ def p_expression_stmt(p):
 
 # Termina Jahir Díaz Cedeño
 #___________________________
+def p_expression_assignment(p):
+    "expression : ID ASSIGN expression"
+    p[0] = ("assign", p[1], p[3])
 
 
 
@@ -712,7 +728,7 @@ def verificar_semantica_completa(ast):
             if tipo:
                 contexto_global['tipos_variables'][varname] = tipo
         elif isinstance(nodo, tuple) and nodo[0] == "func_def":
-            print("Variables globales antes de la función:", contexto_global['variables_definidas'])
+            # print("Variables globales antes de la función:", contexto_global['variables_definidas'])
             # Verifica la función con el contexto actual (no incluye variables declaradas después)
             nombre, params, tipo, cuerpo = nodo[1], nodo[2], nodo[3], nodo[4]
             contexto_local = crear_contexto_funcion(params, tipo)

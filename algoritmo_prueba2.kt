@@ -1,13 +1,12 @@
-fun calcular() {
-    val numeros = arrayOf(10, 20, 30)
-}
+fun evaluar() {
+    val datos = arrayOf(10, 20, 30)
+    println("Ingresa un número:")
+    val entrada = readLine()
+    val numero = 1 + 2 * 3 / 1
 
-fun verificarEdad(nombre: String, edad: Int): Boolean {
-    if (edad >= 18 && edad <= 60) {
-        println(nombre + " está en edad laboral")
-        return true
+    if (entrada == "ok") {
+        println("Todo correcto")
     } else {
-        println(nombre + " no está en edad laboral")
-        return false
+        println("Error en entrada")
     }
 }

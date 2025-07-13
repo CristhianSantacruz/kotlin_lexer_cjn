@@ -122,6 +122,7 @@ reserved = {
     'try': 'TRY',
     'catch': 'CATCH',
     'finally': 'FINALLY',
+    'null': 'NULL',
 
     #Fin Noelia Saltos Hernandez
    
