@@ -368,7 +368,7 @@ class KotlinAnalyzerGUI:
                 self.errors_output.insert(tk.END, "✔ Análisis sintáctico exitoso\n")
 
             # Verificar semántica solo si no hubo errores sintácticos
-            if resultado and not errores_sintacticos:
+            if resultado:
                 verificar_semantica_completa(resultado)
 
             # Mostrar errores semánticos

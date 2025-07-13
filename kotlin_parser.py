@@ -1,5 +1,5 @@
 import ply.yacc as yacc  
-from kotlin_lexer import tokens  
+from kotlin_lexer import tokens
 from datetime import datetime
 from pprint import pprint
 import os
@@ -119,7 +119,9 @@ def p_declaration(p):
     if len(p) == 6 or len(p) == 7:
         tipo = p[4]
         context_semantico['tipos_variables'][p[2]] = tipo
-    p[0] = ("declare", p[1], p[2], p[4])
+    else:
+        tipo_inferido = inferir_tipo_expresion(p[4], context_semantico)
+        context_semantico['tipos_variables'][p[2]] = tipo_inferido
 
 
 
@@ -178,6 +180,18 @@ def p_map_entry(p):
     """map_entry : expression TO expression"""
     p[0] = (p[1], p[3])
 
+def p_expression_call_func(p):
+    """expression : ID LPAREN expression_list RPAREN"""
+    p[0] = ("call_func", p[1], p[3])
+
+def p_expression_index(p):
+    "expression : expression LBRACKET expression RBRACKET"
+    p[0] = ("index", p[1], p[3])
+
+def p_expression_member(p):
+    "expression : expression DOT ID"
+    p[0] = ("member", p[1], p[3])
+
 #Inicio Semantico Jahir Díaz Cedeño
 # Verificación semántica de tipos
 
@@ -195,11 +209,22 @@ def inferir_tipo_expresion(expr, contexto):
                 return "Double"
             elif isinstance(value, str):
                 return "String"
+        
+        elif tipo_expr == "call_func":
+            func_name = expr[1]
+            # Busca el tipo de retorno de la función en el contexto semántico
+            for f in context_semantico.get('funciones_definidas', []):
+                if f == func_name:
+                    # Busca el tipo en el AST de funciones
+                    # Si tienes un diccionario de tipos de retorno, úsalo aquí
+                    return context_semantico.get('tipos_funciones', {}).get(func_name, "Unknown")
+            return "Unknown"
 
         elif tipo_expr == "id":
             var_name = expr[1]
             # Buscar en contexto local y global
             if var_name not in contexto["variables_definidas"] and var_name not in context_semantico["variables_definidas"]:
+                print(f"Detectado uso de variable no declarada: {var_name}")
                 add_error_semantico(f"La variable '{var_name}' se está usando antes de ser declarada.")
                 return "Unknown"
             # Prioridad: local, luego global
@@ -221,6 +246,8 @@ def inferir_tipo_expresion(expr, contexto):
                 return "Unknown"
             else:
                 return "Boolean"
+            
+        
     return "Unknown"
 
 
@@ -423,6 +450,17 @@ def verificar_tipo_retorno_funcion(valor,contexto_local):
         add_error_semantico(
             f"Tipo de retorno incorrecto. Se esperaba '{tipo_esperado}' pero se obtuvo '{tipo_real}'"
         )
+def verificar_returns_en_cuerpo(cuerpo, contexto_local):
+    """Recorre recursivamente el cuerpo de la función y verifica todos los returns"""
+    if isinstance(cuerpo, list):
+        for stmt in cuerpo:
+            verificar_returns_en_cuerpo(stmt, contexto_local)
+    elif isinstance(cuerpo, tuple):
+        if cuerpo[0] == "return":
+            verificar_tipo_retorno_funcion(cuerpo[1], contexto_local)
+        else:
+            for elem in cuerpo[1:]:
+                verificar_returns_en_cuerpo(elem, contexto_local)
 
 def validar_funcion_unit_sin_return(body,contexto_local):
     for sentencia in body:
@@ -513,12 +551,17 @@ def p_function_def(p):
 
     context_semantico['funciones_definidas'].add(nombre)
     context_semantico['parametros_por_funcion'][nombre] = params
+    if 'tipos_funciones' not in context_semantico:
+        context_semantico['tipos_funciones'] = {}
+    context_semantico['tipos_funciones'][nombre] = tipo
     contexto_local = crear_contexto_funcion(params, tipo)
 
     # Verificar el cuerpo de la función usando el contexto local
     if tipo != "Unit":
         for stmt in cuerpo:
-            verificar_tipo_retorno_funcion(stmt[1], contexto_local)
+         # Verifica todos los returns
+            if isinstance(stmt, tuple) and stmt[0] == "return":
+                verificar_returns_en_cuerpo(cuerpo, contexto_local)
     else:
         validar_funcion_unit_sin_return(cuerpo, contexto_local)
 
@@ -620,6 +663,14 @@ def verificar_nodo_semantica(nodo, contexto_local):
     elif tipo == 'continue':
         if not contexto_local.get('en_bucle', False):
             add_error_semantico("'continue' solo puede usarse dentro de un bucle")
+    elif tipo == "binop":
+        _, op, izq, der = nodo
+        inferir_tipo_expresion(izq, contexto_local)
+        inferir_tipo_expresion(der, contexto_local)
+    elif tipo == "print":
+        # Verifica la expresión dentro del print
+        expr = nodo[1]
+        inferir_tipo_expresion(expr, contexto_local)
             
     else:
         # Verificar recursivamente otros nodos
@@ -661,6 +712,7 @@ def verificar_semantica_completa(ast):
             if tipo:
                 contexto_global['tipos_variables'][varname] = tipo
         elif isinstance(nodo, tuple) and nodo[0] == "func_def":
+            print("Variables globales antes de la función:", contexto_global['variables_definidas'])
             # Verifica la función con el contexto actual (no incluye variables declaradas después)
             nombre, params, tipo, cuerpo = nodo[1], nodo[2], nodo[3], nodo[4]
             contexto_local = crear_contexto_funcion(params, tipo)
@@ -682,6 +734,10 @@ def p_if_else(p):
     '''if_else : IF LPAREN expression RPAREN block ELSE block'''
     # Solo construye el AST aquí
     p[0] = ("if_else", p[3], p[5], p[7])
+
+def p_if(p):
+    '''if_else : IF LPAREN expression RPAREN block'''
+    p[0] = ("if", p[3], p[5])
 
 # def p_function_def_no_params_no_return(p):
 #     """function_def_no_params_no_return : FUN ID LPAREN RPAREN block"""
@@ -832,6 +888,14 @@ def analizar_archivo_sintactico_semantico(nombre_archivo, usuario_git="usuarioGi
         with open(nombre_archivo, "r", encoding="utf-8") as archivo:
             contenido = archivo.read()
 
+        # print("=== TOKENS DEL LEXER ===")
+        # lexer.input(contenido)
+        # while True:
+        #     tok = lexer.token()
+        #     if not tok:
+        #         break
+        #     print(tok)
+
         print(f"-Analizando archivo: {nombre_archivo}")
         resultado = parser.parse(contenido)
         
@@ -900,4 +964,4 @@ def analizar_archivo_sintactico_semantico(nombre_archivo, usuario_git="usuarioGi
 #analizar_archivo_sintactico("algoritmo_sintactico3.kt", usuario_git="CristhianSantacruz")
 # analizar_archivo_sintactico_semantico("algoritmo_semantico3.kt", usuario_git="CristhianSantacruz")
 # analizar_archivo_sintactico_semantico("algoritmo_semantico1.kt", usuario_git="JDC1907")
-analizar_archivo_sintactico_semantico("algoritmos_prueba.kt", usuario_git="NoeSaltos")
+analizar_archivo_sintactico_semantico("algo.kt", usuario_git="NoeSaltos")
