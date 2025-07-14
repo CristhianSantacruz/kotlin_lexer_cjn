@@ -213,6 +213,17 @@ def t_ARROW(t):
     r'->'
     return t
 
+def t_BOOLEAN_TRUE(t):
+    r'true'
+    t.value = True
+    return t
+
+def t_BOOLEAN_FALSE(t):
+    r'false'
+    t.value = False
+    return t
+
+
 # Fin Noelia Saltos Hernandez
 
 # Inicio Cristhian Santacruz

@@ -105,6 +105,12 @@ def p_expression_null(p):
     'expression : NULL'
     p[0] = ('null',)
 
+def tipos_compatibles(declarado, real):
+    if declarado == real:
+        return True
+    if declarado == "Double" and real == "Int":
+        return True  # Int puede promoverse a Double
+    return False
 
 # Comienza Jahir Díaz Cedeño
 #___________________________
@@ -115,16 +121,27 @@ def p_declaration(p):
                    | VAL ID ASSIGN expression
                    | VAR ID COLON type ASSIGN expression
                    | VAL ID COLON type ASSIGN expression'''
-   
+    var_name = p[2]
     #------Noelia Saltos, prueba de la regla semantica---------
-    context_semantico['variables_definidas'].add(p[2])
+    context_semantico['variables_definidas'].add(var_name)
     #------Noelia Saltos, Fin prueba de la regla semantica---------
-    if len(p) == 6 or len(p) == 7:
-        tipo = p[4]
-        context_semantico['tipos_variables'][p[2]] = tipo
+    if len(p) == 7:
+        tipo_declarado = p[4]
+        expr = p[6]
+        tipo_expr = inferir_tipo_expresion(expr, context_semantico)
+
+        if not tipos_compatibles(tipo_declarado, tipo_expr):
+            add_error_semantico(
+                f"No se puede asignar un valor de tipo '{tipo_expr}' a una variable '{var_name}' de tipo '{tipo_declarado}'"
+            )
+        context_semantico['tipos_variables'][var_name] = tipo_declarado
+        p[0] = ('declaration', var_name, tipo_declarado, expr)
     else:
-        tipo_inferido = inferir_tipo_expresion(p[4], context_semantico)
-        context_semantico['tipos_variables'][p[2]] = tipo_inferido
+        expr = p[4]
+        tipo_inferido = inferir_tipo_expresion(expr, context_semantico)
+        context_semantico['tipos_variables'][var_name] = tipo_inferido
+        p[0] = ('declaration', var_name, tipo_inferido, expr)
+    
 
 
 
